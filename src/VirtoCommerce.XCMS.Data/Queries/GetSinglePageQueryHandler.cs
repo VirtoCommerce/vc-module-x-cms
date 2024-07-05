@@ -29,7 +29,7 @@ public class GetSinglePageQueryHandler : IQueryHandler<GetSinglePageQuery, PageI
             Take = 1,
             Skip = 0,
         };
-        var result = await _searchContentService.SearchContentAsync(criteria);
+        var result = await _searchContentService.SearchAsync(criteria);
 
         var page = result.Results.Select(x => new PageItem
         {
@@ -37,7 +37,7 @@ public class GetSinglePageQueryHandler : IQueryHandler<GetSinglePageQuery, PageI
             Name = string.IsNullOrEmpty(x.DisplayName) ? x.Name : x.DisplayName,
             RelativeUrl = x.RelativeUrl,
             Permalink = x.Permalink
-        }).First();
+        }).FirstOrDefault();
 
         return page;
     }
