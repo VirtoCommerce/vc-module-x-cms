@@ -7,7 +7,7 @@ namespace VirtoCommerce.XCMS.Data.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddXCMS(this IServiceCollection services, IGraphQLBuilder graphQlbuilder)
+        public static IServiceCollection AddXcms(this IServiceCollection services, IGraphQLBuilder graphQlbuilder)
         {
             graphQlbuilder.AddSchema(typeof(CoreAssemblyMarker), typeof(DataAssemblyMarker));
 

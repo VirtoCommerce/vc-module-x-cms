@@ -15,7 +15,7 @@ public class Module : IModule, IHasConfiguration
     public void Initialize(IServiceCollection serviceCollection)
     {
         var graphQlBuilder = new CustomGraphQLBuilder(serviceCollection);
-        serviceCollection.AddXCMS(graphQlBuilder);
+        serviceCollection.AddXcms(graphQlBuilder);
     }
 
     public void PostInitialize(IApplicationBuilder appBuilder)
