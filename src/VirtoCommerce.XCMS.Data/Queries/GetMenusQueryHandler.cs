@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Services;
-using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XCMS.Core.Models;
 using VirtoCommerce.XCMS.Core.Queries;
 
@@ -47,7 +46,7 @@ namespace VirtoCommerce.XCMS.Data.Queries
                     Items = x.MenuLinks?.Select(y => new MenuItem
                     {
                         Link = y
-                    }).ToList() ?? new List<MenuItem>()
+                    }).ToList() ?? []
                 }),
             };
         }

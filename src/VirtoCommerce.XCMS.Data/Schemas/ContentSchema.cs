@@ -11,6 +11,7 @@ using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XCMS.Core.Models;
 using VirtoCommerce.XCMS.Core.Queries;
 using VirtoCommerce.XCMS.Core.Schemas;
+using static VirtoCommerce.Xapi.Core.ModuleConstants;
 
 namespace VirtoCommerce.XCMS.Data.Schemas
 {
@@ -98,7 +99,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 .Argument<NonNullGraphType<StringGraphType>>("storeId", "The store id where pages are searched")
                 .Argument<NonNullGraphType<StringGraphType>>("keyword", "The keyword parameter performs the full-text search")
                 .Argument<StringGraphType>("cultureName", "The language for which all localized category data will be returned")
-                .PageSize(20);
+                .PageSize(Connections.DefaultPageSize);
 
             pagesConnectionBuilder.ResolveAsync(ResolvePagesConnection);
 
@@ -114,8 +115,8 @@ namespace VirtoCommerce.XCMS.Data.Schemas
 
             var query = new GetPageQuery
             {
-                Take = first ?? context.PageSize ?? 10,
                 Skip = skip,
+                Take = first ?? context.PageSize ?? Connections.DefaultPageSize,
                 StoreId = context.GetArgument<string>("storeId"),
                 CultureName = context.GetArgument<string>("cultureName"),
                 Keyword = context.GetArgument<string>("keyword"),
