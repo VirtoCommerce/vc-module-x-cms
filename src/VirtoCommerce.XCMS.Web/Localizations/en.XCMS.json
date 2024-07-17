@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "XCMS:create": "Create XCMS related data",
+    "XCMS:read": "View XCMS related data",
+    "XCMS:update": "Update XCMS related data",
+    "XCMS:delete": "Delete XCMS related data"
+  }
+}
