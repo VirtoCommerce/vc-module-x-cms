@@ -10,8 +10,8 @@
     <dependency id="VirtoCommerce.Content" version="3.815.0" />
   </dependencies>
 
-  <title>VirtoCommerce XCMS module</title>
-  <description>VirtoCommerce XCMS module</description>
+  <title>CMS Experience API</title>
+  <description>Integrates with content management systems, facilitating seamless content delivery and management.</description>
 
   <authors>
     <author>Eugeny Tatarincev</author>
