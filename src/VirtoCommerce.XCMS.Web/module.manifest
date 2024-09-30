@@ -34,7 +34,7 @@
     <group>commerce</group>
   </groups>
 
-  <projectUrl>https://github.com/VirtoCommerce/vc-module-xcms</projectUrl>
+  <projectUrl>https://github.com/VirtoCommerce/vc-module-x-cms</projectUrl>
   <iconUrl>Modules/$(VirtoCommerce.XCMS)/Content/logo.png</iconUrl>
   <requireLicenseAcceptance>false</requireLicenseAcceptance>
 
