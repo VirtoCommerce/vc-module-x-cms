@@ -12,7 +12,6 @@ public class PageDocumentType : ObjectGraphType<PageDocument>
     {
         Field(x => x.Id, nullable: false);
         Field(x => x.Source, nullable: true).Description("Page source");
-        // Field(x => x.RelativeUrl, nullable: true).Description("Page file relative url");
         Field(x => x.Permalink, nullable: true).Description("Page permalink");
         Field(x => x.Content, nullable: false).ResolveAsync(LoadContent);
     }
@@ -25,7 +24,6 @@ public class PageDocumentType : ObjectGraphType<PageDocument>
         }
         catch (System.Exception)
         {
-            // throw new FileNotFoundException(context.Source?.RelativeUrl);
             throw new FileNotFoundException(context.Source?.Permalink);
         }
     }
