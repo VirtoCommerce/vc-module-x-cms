@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using VirtoCommerce.Pages.Core.Models;
 using VirtoCommerce.Pages.Core.Search;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XCMS.Core.Queries;
 
@@ -13,14 +14,12 @@ public class GetPageDocumentQueryHandler(IPageDocumentSearchService pageDocument
 
     public async Task<GetPageDocumentsResponse> Handle(GetPageDocumentsQuery request, CancellationToken cancellationToken)
     {
-        var criteria = new PageDocumentSearchCriteria
-        {
-            StoreId = request.StoreId,
-            LanguageCode = request.CultureName,
-            Keyword = request.Keyword,
-            Take = request.Take,
-            Skip = request.Skip,
-        };
+        var criteria = AbstractTypeFactory<PageDocumentSearchCriteria>.TryCreateInstance();
+        criteria.StoreId = request.StoreId;
+        criteria.LanguageCode = request.CultureName;
+        criteria.Keyword = request.Keyword;
+        criteria.Take = request.Take;
+        criteria.Skip = request.Skip;
 
         var result = await pageDocumentSearchService.SearchAsync(criteria);
 
