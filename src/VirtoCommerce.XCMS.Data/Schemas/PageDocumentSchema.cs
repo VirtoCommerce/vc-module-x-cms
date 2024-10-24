@@ -59,8 +59,6 @@ namespace VirtoCommerce.XCMS.Data.Schemas
             var first = context.First;
             var skip = Convert.ToInt32(context.After ?? 0.ToString());
 
-            var user = context.GetCurrentPrincipal();
-
             var query = new GetPageDocumentsQuery
             {
                 Skip = skip,
