@@ -23,8 +23,6 @@ namespace VirtoCommerce.XCMS.Data.Schemas
             {
                 Name = "pageDocument",
                 Arguments = new QueryArguments(
-                    //new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "storeId" },
-                    //new QueryArgument<StringGraphType> { Name = "cultureName" },
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "id" }
                 ),
                 Type = GraphTypeExtenstionHelper.GetActualType<PageDocumentType>(),
@@ -34,8 +32,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
 
                     var result = await mediator.Send(new GetSinglePageDocumentQuery
                     {
-                        //StoreId = context.GetArgument<string>("storeId"),
-                        //CultureName = context.GetArgument<string>("cultureName"),
+                        UserId = context.GetCurrentUserId(),
                         Id = context.GetArgument<string>("id"),
                     });
 
@@ -62,6 +59,8 @@ namespace VirtoCommerce.XCMS.Data.Schemas
             var first = context.First;
             var skip = Convert.ToInt32(context.After ?? 0.ToString());
 
+            var user = context.GetCurrentPrincipal();
+
             var query = new GetPageDocumentsQuery
             {
                 Skip = skip,
@@ -69,6 +68,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 StoreId = context.GetArgument<string>("storeId"),
                 CultureName = context.GetArgument<string>("cultureName"),
                 Keyword = context.GetArgument<string>("keyword"),
+                UserId = context.GetCurrentUserId(),
             };
 
             var response = await mediator.Send(query);
