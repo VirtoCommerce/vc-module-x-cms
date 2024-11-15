@@ -33,7 +33,7 @@ public class GetSinglePageDocumentQueryHandler(
         await criteria.EnrichAuth(user, memberService);
 
         var result = await pageDocumentSearchService.SearchAsync(criteria);
-        var page = result.Results.FirstOrDefault(x => x.Status == PageDocumentStatus.Published && x.Visibility == PageDocumentVisibility.Public);
+        var page = result.Results.FirstOrDefault();
 
         return page;
     }
