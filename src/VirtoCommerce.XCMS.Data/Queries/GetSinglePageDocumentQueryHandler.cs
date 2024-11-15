@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
-using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.Pages.Core.Extensions;
 using VirtoCommerce.Pages.Core.Models;
 using VirtoCommerce.Pages.Core.Search;
 using VirtoCommerce.Platform.Core.Common;
@@ -24,33 +24,17 @@ public class GetSinglePageDocumentQueryHandler(
     public async Task<PageDocument> Handle(GetSinglePageDocumentQuery request, CancellationToken cancellationToken)
     {
         var criteria = AbstractTypeFactory<PageDocumentSearchCriteria>.TryCreateInstance();
-        criteria.UserGroups = [];
         criteria.ObjectIds = [request.Id];
         criteria.Take = 1;
         criteria.Skip = 0;
 
-        var member = await FindMember(request.UserId);
-        if (member != null)
-        {
-            criteria.UserGroups = member.Groups.ToArray();
-        }
+        var userManager = userManagerFactory();
+        var user = userManager.Users.FirstOrDefault(x => x.Id == request.UserId);
+        await criteria.EnrichAuth(user, memberService);
 
         var result = await pageDocumentSearchService.SearchAsync(criteria);
         var page = result.Results.FirstOrDefault(x => x.Status == PageDocumentStatus.Published && x.Visibility == PageDocumentVisibility.Public);
 
         return page;
-    }
-
-    private async Task<Member> FindMember(string userId)
-    {
-        var userManager = userManagerFactory();
-        var user = userManager.Users.FirstOrDefault(x => x.Id == userId);
-
-        if (user != null)
-        {
-            return await memberService.GetByIdAsync(user.MemberId);
-        }
-
-        return null;
     }
 }
