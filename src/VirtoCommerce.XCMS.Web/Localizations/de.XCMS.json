@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "XCMS:create": "xCMS-bezogene Daten erstellen",
+    "XCMS:read": "xCMS-bezogene Daten anzeigen",
+    "XCMS:update": "xCMS-bezogene Daten aktualisieren",
+    "XCMS:delete": "xCMS-bezogene Daten löschen"
+  }
+}
