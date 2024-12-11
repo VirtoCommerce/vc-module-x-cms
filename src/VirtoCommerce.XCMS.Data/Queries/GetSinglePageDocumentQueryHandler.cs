@@ -8,6 +8,7 @@ using VirtoCommerce.Pages.Core.Extensions;
 using VirtoCommerce.Pages.Core.Models;
 using VirtoCommerce.Pages.Core.Search;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XCMS.Core.Queries;
@@ -15,7 +16,7 @@ using VirtoCommerce.XCMS.Core.Queries;
 namespace VirtoCommerce.XCMS.Data.Queries;
 
 public class GetSinglePageDocumentQueryHandler(
-    IPageDocumentSearchService pageDocumentSearchService,
+    IOptionalDependency<IPageDocumentSearchService> pageDocumentSearchService,
     Func<UserManager<ApplicationUser>> userManagerFactory,
     IMemberService memberService
     )
@@ -23,6 +24,11 @@ public class GetSinglePageDocumentQueryHandler(
 {
     public async Task<PageDocument> Handle(GetSinglePageDocumentQuery request, CancellationToken cancellationToken)
     {
+        if (!pageDocumentSearchService.HasValue)
+        {
+            return null;
+        }
+
         var criteria = AbstractTypeFactory<PageDocumentSearchCriteria>.TryCreateInstance();
         criteria.ObjectIds = [request.Id];
         criteria.Take = 1;
@@ -32,7 +38,7 @@ public class GetSinglePageDocumentQueryHandler(
         var user = userManager.Users.FirstOrDefault(x => x.Id == request.UserId);
         await criteria.EnrichAuth(user, memberService);
 
-        var result = await pageDocumentSearchService.SearchAsync(criteria);
+        var result = await pageDocumentSearchService.Value.SearchAsync(criteria);
         var page = result.Results.FirstOrDefault();
 
         return page;
