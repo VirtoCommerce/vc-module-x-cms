@@ -1,9 +1,10 @@
 using GraphQL.Types;
+using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.XCMS.Core.Models;
 
 namespace VirtoCommerce.XCMS.Core.Schemas
 {
-    public class MenuLinkType : ObjectGraphType<MenuItem>
+    public class MenuLinkType : ExtendableGraphType<MenuItem>
     {
         public MenuLinkType()
         {

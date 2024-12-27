@@ -1,9 +1,11 @@
+using GraphQL.MicrosoftDI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Xapi.Core.Infrastructure;
-using VirtoCommerce.XCMS.Data.Extensions;
+using VirtoCommerce.Xapi.Core.Extensions;
+using VirtoCommerce.XCMS.Core;
+using VirtoCommerce.XCMS.Data;
 
 namespace VirtoCommerce.XCMS.Web;
 
@@ -14,8 +16,10 @@ public class Module : IModule, IHasConfiguration
 
     public void Initialize(IServiceCollection serviceCollection)
     {
-        var graphQlBuilder = new CustomGraphQLBuilder(serviceCollection);
-        serviceCollection.AddXcms(graphQlBuilder);
+        var graphQlBuilder = new GraphQLBuilder(serviceCollection, builder =>
+        {
+            builder.AddSchema(serviceCollection, typeof(CoreAssemblyMarker), typeof(DataAssemblyMarker));
+        });
     }
 
     public void PostInitialize(IApplicationBuilder appBuilder)

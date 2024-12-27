@@ -25,8 +25,8 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 Arguments = new QueryArguments(
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "id" }
                 ),
-                Type = GraphTypeExtenstionHelper.GetActualType<PageDocumentType>(),
-                Resolver = new AsyncFieldResolver<object>(async context =>
+                Type = GraphTypeExtensionHelper.GetActualType<PageDocumentType>(),
+                Resolver = new FuncFieldResolver<object>(async context =>
                 {
                     context.CopyArgumentsToUserContext();
 
@@ -40,8 +40,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 })
             });
 
-            var pagesConnectionBuilder = GraphTypeExtenstionHelper.CreateConnection<PageDocumentType, object>()
-                .Name("pageDocuments")
+            var pagesConnectionBuilder = GraphTypeExtensionHelper.CreateConnection<PageDocumentType, object>("pageDocuments")
                 .Argument<NonNullGraphType<StringGraphType>>("storeId", "The store id where pages are searched")
                 .Argument<NonNullGraphType<StringGraphType>>("keyword", "The keyword parameter performs the full-text search")
                 .Argument<StringGraphType>("cultureName", "The language for which all localized category data will be returned")
