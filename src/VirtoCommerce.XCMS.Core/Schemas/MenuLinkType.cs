@@ -15,7 +15,7 @@ namespace VirtoCommerce.XCMS.Core.Schemas
             Field(x => x.Link.AssociatedObjectName, nullable: true).Description("Menu item object name");
             Field(x => x.Link.AssociatedObjectType, nullable: true).Description("Menu item type name");
             Field(x => x.Link.OuterId, nullable: true).Description("Menu item outerID");
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<MenuLinkType>>>>(nameof(MenuItem.ChildItems), resolve: context => context.Source.ChildItems);
+            Field<NonNullGraphType<ListGraphType<NonNullGraphType<MenuLinkType>>>>(nameof(MenuItem.ChildItems)).Resolve(context => context.Source.ChildItems);
         }
     }
 }
