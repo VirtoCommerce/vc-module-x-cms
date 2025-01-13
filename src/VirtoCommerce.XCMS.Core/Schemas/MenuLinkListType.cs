@@ -1,4 +1,6 @@
+using GraphQL.Resolvers;
 using GraphQL.Types;
+using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.XCMS.Core.Models;
 
 namespace VirtoCommerce.XCMS.Core.Schemas
@@ -9,7 +11,12 @@ namespace VirtoCommerce.XCMS.Core.Schemas
         {
             Field(x => x.Name, nullable: false).Description("Menu name");
             Field(x => x.OuterId, nullable: true).Description("Menu outer ID");
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<MenuLinkType>>>>("items", resolve: context => context.Source.Items);
+            AddField(new FieldType
+            {
+                Name = "items",
+                Type = GraphTypeExtenstionHelper.GetActualComplexType<NonNullGraphType<ListGraphType<NonNullGraphType<MenuLinkType>>>>(),
+                Resolver = new FuncFieldResolver<Menu, object>(context => context.Source?.Items)
+            });
         }
     }
 }
