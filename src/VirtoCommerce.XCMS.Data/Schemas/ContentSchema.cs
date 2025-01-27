@@ -34,8 +34,8 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "cultureName" },
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "name" }
                 ),
-                Type = GraphTypeExtenstionHelper.GetActualType<MenuLinkListType>(),
-                Resolver = new AsyncFieldResolver<object>(async context =>
+                Type = GraphTypeExtensionHelper.GetActualType<MenuLinkListType>(),
+                Resolver = new FuncFieldResolver<object>(async context =>
                 {
                     var result = await _mediator.Send(new GetMenuQuery
                     {
@@ -56,8 +56,8 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                     new QueryArgument<StringGraphType> { Name = "cultureName" },
                     new QueryArgument<StringGraphType> { Name = "keyword" }
                 ),
-                Type = GraphTypeExtenstionHelper.GetActualType<NonNullGraphType<ListGraphType<NonNullGraphType<MenuLinkListType>>>>(),
-                Resolver = new AsyncFieldResolver<object>(async context =>
+                Type = GraphTypeExtensionHelper.GetActualType<NonNullGraphType<ListGraphType<NonNullGraphType<MenuLinkListType>>>>(),
+                Resolver = new FuncFieldResolver<object>(async context =>
                 {
                     var result = await _mediator.Send(new GetMenusQuery
                     {
@@ -78,8 +78,8 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                     new QueryArgument<StringGraphType> { Name = "cultureName" },
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "id" }
                 ),
-                Type = GraphTypeExtenstionHelper.GetActualType<PageType>(),
-                Resolver = new AsyncFieldResolver<object>(async context =>
+                Type = GraphTypeExtensionHelper.GetActualType<PageType>(),
+                Resolver = new FuncFieldResolver<object>(async context =>
                 {
                     context.CopyArgumentsToUserContext();
 
@@ -94,8 +94,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 })
             });
 
-            var pagesConnectionBuilder = GraphTypeExtenstionHelper.CreateConnection<PageType, object>()
-                .Name("pages")
+            var pagesConnectionBuilder = GraphTypeExtensionHelper.CreateConnection<PageType, object>("pages")
                 .Argument<NonNullGraphType<StringGraphType>>("storeId", "The store id where pages are searched")
                 .Argument<NonNullGraphType<StringGraphType>>("keyword", "The keyword parameter performs the full-text search")
                 .Argument<StringGraphType>("cultureName", "The language for which all localized category data will be returned")
