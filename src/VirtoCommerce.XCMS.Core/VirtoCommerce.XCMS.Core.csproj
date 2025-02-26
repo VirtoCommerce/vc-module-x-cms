@@ -11,7 +11,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="VirtoCommerce.CustomerModule.Core" Version="3.817.0" />
     <PackageReference Include="VirtoCommerce.Pages.Core" Version="3.804.0" />
-    <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.904.0-alpha.74-vcst-2589-update-mediatr" />
+    <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.904.0" />
     <PackageReference Include="VirtoCommerce.ContentModule.Core" Version="3.815.0" />
   </ItemGroup>
 </Project>
