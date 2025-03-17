@@ -7,7 +7,6 @@ The xCMS module serves as a component for managing and delivering dynamic conten
 ## Documentation
 
 * [xCMS module documentation](https://docs.virtocommerce.org/platform/developer-guide/GraphQL-Storefront-API-Reference-xAPI/Content/overview/)
-* [REST API](https://virtostart-demo-admin.govirto.com/docs/index.html?urls.primaryName=VirtoCommerce.XCMS)
 * [View on GitHub](https://github.com/VirtoCommerce/vc-module-x-cms)
 * [Experience API Documentation](https://docs.virtocommerce.org/platform/developer-guide/GraphQL-Storefront-API-Reference-xAPI/)
 * [Getting started](https://docs.virtocommerce.org/platform/developer-guide/GraphQL-Storefront-API-Reference-xAPI/getting-started/)
