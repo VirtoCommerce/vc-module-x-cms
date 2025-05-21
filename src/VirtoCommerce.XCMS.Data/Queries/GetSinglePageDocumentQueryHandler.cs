@@ -33,6 +33,7 @@ public class GetSinglePageDocumentQueryHandler(
         criteria.ObjectIds = [request.Id];
         criteria.Take = 1;
         criteria.Skip = 0;
+        criteria.CertainDate = DateTime.UtcNow;
 
         var userManager = userManagerFactory();
         var user = userManager.Users.FirstOrDefault(x => x.Id == request.UserId);
