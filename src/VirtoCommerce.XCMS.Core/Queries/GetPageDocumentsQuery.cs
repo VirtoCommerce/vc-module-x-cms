@@ -3,6 +3,9 @@ using VirtoCommerce.Xapi.Core.Infrastructure;
 
 namespace VirtoCommerce.XCMS.Core.Queries;
 
+/// <summary>
+/// Get all page documents from the search index for current date.
+/// </summary>
 public class GetPageDocumentsQuery : IQuery<GetPageDocumentsResponse>
 {
     public string UserId { get; set; }

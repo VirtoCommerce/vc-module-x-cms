@@ -23,7 +23,7 @@ public class GetPageDocumentQueryHandler(IOptionalDependency<IPageDocumentSearch
 
     public async Task<GetPageDocumentsResponse> Handle(GetPageDocumentsQuery request, CancellationToken cancellationToken)
     {
-        if(!pageDocumentSearchService.HasValue)
+        if (!pageDocumentSearchService.HasValue)
         {
             return new GetPageDocumentsResponse { Pages = Array.Empty<PageDocument>(), TotalCount = 0 };
         }
@@ -34,6 +34,7 @@ public class GetPageDocumentQueryHandler(IOptionalDependency<IPageDocumentSearch
         criteria.Keyword = request.Keyword;
         criteria.Take = request.Take;
         criteria.Skip = request.Skip;
+        criteria.CertainDate = DateTime.UtcNow;
 
         var userManager = userManagerFactory();
         var user = userManager.Users.FirstOrDefault(x => x.Id == request.UserId);
