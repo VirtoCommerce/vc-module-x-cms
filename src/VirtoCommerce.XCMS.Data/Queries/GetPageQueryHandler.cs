@@ -24,6 +24,7 @@ public class GetPageQueryHandler : IQueryHandler<GetPageQuery, GetPageResponse>
         var criteria = new ContentSearchCriteria
         {
             StoreId = request.StoreId,
+            OrganizationId = request.OrganizationId,
             ContentType = ContentTypes.Pages,
             LanguageCode = request.CultureName,
             Keyword = request.Keyword,

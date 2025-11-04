@@ -53,8 +53,8 @@ namespace VirtoCommerce.XCMS.Data.Queries
         private static MenuLinkList GetMenuLinkList(IEnumerable<MenuLinkList> lists, string cultureName, string name)
         {
             return lists.FirstOrDefault(x =>
-                x.Language?.EqualsInvariant(cultureName) == true &&
-                x.Name.EqualsInvariant(name));
+                x.Language?.EqualsIgnoreCase(cultureName) == true &&
+                x.Name.EqualsIgnoreCase(name));
         }
 
         private static MenuItem GetMenuLink(MenuLink link, MenuLinkList list)

@@ -32,6 +32,7 @@ public class GetPageDocumentQueryHandler(IOptionalDependency<IPageDocumentSearch
         criteria.StoreId = request.StoreId;
         criteria.LanguageCode = request.CultureName;
         criteria.Keyword = request.Keyword;
+        criteria.OrganizationId = request.OrganizationId;
         criteria.Take = request.Take;
         criteria.Skip = request.Skip;
         criteria.CertainDate = DateTime.UtcNow;

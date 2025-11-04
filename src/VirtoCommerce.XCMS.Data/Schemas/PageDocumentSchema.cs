@@ -32,6 +32,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
 
                     var result = await mediator.Send(new GetSinglePageDocumentQuery
                     {
+                        OrganizationId = context.GetCurrentOrganizationId(),
                         UserId = context.GetCurrentUserId(),
                         Id = context.GetArgument<string>("id"),
                     });
@@ -65,6 +66,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 StoreId = context.GetArgument<string>("storeId"),
                 CultureName = context.GetArgument<string>("cultureName"),
                 Keyword = context.GetArgument<string>("keyword"),
+                OrganizationId = context.GetCurrentOrganizationId(),
                 UserId = context.GetCurrentUserId(),
             };
 
