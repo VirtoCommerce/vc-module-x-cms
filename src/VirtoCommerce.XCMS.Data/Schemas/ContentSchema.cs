@@ -87,6 +87,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                     {
                         StoreId = context.GetArgument<string>("storeId"),
                         CultureName = context.GetArgument<string>("cultureName"),
+                        OrganizationId = context.GetCurrentOrganizationId(),
                         Id = context.GetArgument<string>("id"),
                     });
 
@@ -118,6 +119,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 Take = first ?? context.PageSize ?? Connections.DefaultPageSize,
                 StoreId = context.GetArgument<string>("storeId"),
                 CultureName = context.GetArgument<string>("cultureName"),
+                OrganizationId = context.GetCurrentOrganizationId(),
                 Keyword = context.GetArgument<string>("keyword"),
             };
 

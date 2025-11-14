@@ -10,4 +10,5 @@ public class GetSinglePageDocumentQuery : IQuery<PageDocument>
 {
     public string Id { get; set; }
     public string UserId { get; set; }
+    public string OrganizationId { get; set; }
 }

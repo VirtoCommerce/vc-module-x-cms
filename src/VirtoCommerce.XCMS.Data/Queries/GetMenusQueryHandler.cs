@@ -29,7 +29,7 @@ namespace VirtoCommerce.XCMS.Data.Queries
 
             if (!string.IsNullOrEmpty(request.CultureName))
             {
-                result = result.Where(x => x.Language?.EqualsInvariant(request.CultureName) == true);
+                result = result.Where(x => x.Language?.EqualsIgnoreCase(request.CultureName) == true);
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))

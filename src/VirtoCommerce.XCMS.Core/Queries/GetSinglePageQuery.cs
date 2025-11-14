@@ -7,5 +7,6 @@ public class GetSinglePageQuery : IQuery<PageItem>
 {
     public string StoreId { get; set; }
     public string CultureName { get; set; }
+    public string OrganizationId { get; set; }
     public string Id { get; set; }
 }

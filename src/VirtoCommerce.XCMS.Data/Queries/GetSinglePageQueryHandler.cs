@@ -24,6 +24,7 @@ public class GetSinglePageQueryHandler : IQueryHandler<GetSinglePageQuery, PageI
         var criteria = new ContentSearchCriteria
         {
             StoreId = request.StoreId,
+            OrganizationId = request.OrganizationId,
             ContentType = ContentTypes.Pages,
             ObjectIds = [request.Id],
             Take = 1,
