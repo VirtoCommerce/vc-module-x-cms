@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>True</IsPackable>
@@ -9,9 +9,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-    <PackageReference Include="VirtoCommerce.ContentModule.Core" Version="3.831.0" />
-    <PackageReference Include="VirtoCommerce.CustomerModule.Core" Version="3.833.0" />
-    <PackageReference Include="VirtoCommerce.Pages.Core" Version="3.810.0" />
-    <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.927.0" />
+    <PackageReference Include="VirtoCommerce.ContentModule.Core" Version="3.832.0-alpha.1022-vcst-4203-cleanup" />
+    <PackageReference Include="VirtoCommerce.CustomerModule.Core" Version="3.846.0-alpha.929-vcst-4203-cleanup" />
+    <PackageReference Include="VirtoCommerce.Pages.Core" Version="3.811.0-alpha.38-vcst-4203-cleanup" />
+    <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.928.0-alpha.130-vcst-4203-cleanup" />
   </ItemGroup>
 </Project>
