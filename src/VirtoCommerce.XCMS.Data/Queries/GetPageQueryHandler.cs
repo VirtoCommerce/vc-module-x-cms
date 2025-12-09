@@ -1,8 +1,13 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Search;
+using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.Pages.Core.Models;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XCMS.Core.Models;
 using VirtoCommerce.XCMS.Core.Queries;
@@ -10,14 +15,12 @@ using static VirtoCommerce.ContentModule.Core.ContentConstants;
 
 namespace VirtoCommerce.XCMS.Data.Queries;
 
-public class GetPageQueryHandler : IQueryHandler<GetPageQuery, GetPageResponse>
+public class GetPageQueryHandler(
+    IFullTextContentSearchService searchContentService,
+    Func<UserManager<ApplicationUser>> userManagerFactory,
+    IMemberService memberService)
+    : IQueryHandler<GetPageQuery, GetPageResponse>
 {
-    private readonly IFullTextContentSearchService _searchContentService;
-
-    public GetPageQueryHandler(IFullTextContentSearchService searchContentService)
-    {
-        _searchContentService = searchContentService;
-    }
 
     public async Task<GetPageResponse> Handle(GetPageQuery request, CancellationToken cancellationToken)
     {
@@ -25,6 +28,7 @@ public class GetPageQueryHandler : IQueryHandler<GetPageQuery, GetPageResponse>
         {
             StoreId = request.StoreId,
             OrganizationId = request.OrganizationId,
+            ActiveOn = DateTime.UtcNow,
             ContentType = ContentTypes.Pages,
             LanguageCode = request.CultureName,
             Keyword = request.Keyword,
@@ -32,7 +36,27 @@ public class GetPageQueryHandler : IQueryHandler<GetPageQuery, GetPageResponse>
             Skip = request.Skip,
         };
 
-        var result = await _searchContentService.SearchAsync(criteria);
+        var userManager = userManagerFactory();
+        var user = userManager.Users.FirstOrDefault(x => x.Id == request.UserId);
+        if (user != null)
+        {
+            var member = await memberService.GetByIdAsync(user.MemberId);
+            if (member != null)
+            {
+                criteria.UserGroups = member.Groups.ToArray();
+            }
+
+            if (user.IsAdministrator)
+            {
+                criteria.UserGroups = null;
+            }
+        }
+        else
+        {
+            criteria.UserGroups = [];
+        }
+
+        var result = await searchContentService.SearchAsync(criteria);
         var pages = result.Results.Select(x => new PageItem
         {
             Id = x.Id,
