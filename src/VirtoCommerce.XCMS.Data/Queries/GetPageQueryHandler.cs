@@ -40,15 +40,21 @@ public class GetPageQueryHandler(
         var user = await userManager.FindByIdAsync(request.UserId);
         if (user != null)
         {
-            var member = await memberService.GetByIdAsync(user.MemberId);
-            if (member != null)
-            {
-                criteria.UserGroups = member.Groups.ToArray();
-            }
-
             if (user.IsAdministrator)
             {
                 criteria.UserGroups = null;
+            }
+            else
+            {
+                var member = await memberService.GetByIdAsync(user.MemberId);
+                if (member != null)
+                {
+                    criteria.UserGroups = member.Groups.ToArray();
+                }
+                else
+                {
+                    criteria.UserGroups = [];
+                }
             }
         }
         else
