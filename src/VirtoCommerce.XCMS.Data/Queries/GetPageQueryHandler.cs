@@ -37,7 +37,7 @@ public class GetPageQueryHandler(
         };
 
         var userManager = userManagerFactory();
-        var user = userManager.Users.FirstOrDefault(x => x.Id == request.UserId);
+        var user = await userManager.FindByIdAsync(request.UserId);
         if (user != null)
         {
             var member = await memberService.GetByIdAsync(user.MemberId);
