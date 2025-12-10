@@ -47,7 +47,7 @@ public class GetPageQueryHandler(
             else
             {
                 var member = await memberService.GetByIdAsync(user.MemberId);
-                if (member != null)
+                if (member != null && member.Groups != null)
                 {
                     criteria.UserGroups = member.Groups.ToArray();
                 }
