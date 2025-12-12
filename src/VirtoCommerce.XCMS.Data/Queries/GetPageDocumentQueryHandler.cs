@@ -36,6 +36,7 @@ public class GetPageDocumentQueryHandler(IOptionalDependency<IPageDocumentSearch
         criteria.Take = request.Take;
         criteria.Skip = request.Skip;
         criteria.CertainDate = DateTime.UtcNow;
+        criteria.Status = PageDocumentStatus.Published;
 
         var userManager = userManagerFactory();
         var user = userManager.Users.FirstOrDefault(x => x.Id == request.UserId);

@@ -11,6 +11,7 @@ public class PageDocumentType : ObjectGraphType<PageDocument>
     public PageDocumentType()
     {
         Field(x => x.Id, nullable: false);
+        Field(x => x.Title, nullable: true).Description("Page title");
         Field(x => x.Source, nullable: true).Description("Page source");
         Field(x => x.Permalink, nullable: true).Description("Page permalink");
         Field(x => x.Content, nullable: false).ResolveAsync(LoadContent);
