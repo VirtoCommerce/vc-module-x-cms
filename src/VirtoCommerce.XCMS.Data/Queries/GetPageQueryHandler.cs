@@ -47,7 +47,7 @@ public class GetPageQueryHandler(
         {
             if (user.IsAdministrator)
             {
-                // Filter will not be applied for if UserGroups is null
+                // Filter will not be applied when UserGroups is null
                 criteria.UserGroups = null;
             }
             else
