@@ -38,10 +38,16 @@ public class GetPageQueryHandler(
 
         var userManager = userManagerFactory();
         var user = await userManager.FindByIdAsync(request.UserId);
-        if (user != null)
+        if (user == null)
+        {
+            // Filter will have the "any" value
+            criteria.UserGroups = [];
+        }
+        else
         {
             if (user.IsAdministrator)
             {
+                // Filter will not be applied for if UserGroups is null
                 criteria.UserGroups = null;
             }
             else
@@ -56,10 +62,6 @@ public class GetPageQueryHandler(
                     criteria.UserGroups = [];
                 }
             }
-        }
-        else
-        {
-            criteria.UserGroups = [];
         }
 
         var result = await searchContentService.SearchAsync(criteria);
