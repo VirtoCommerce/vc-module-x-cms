@@ -5,6 +5,7 @@ namespace VirtoCommerce.XCMS.Core.Queries
 {
     public class GetPageQuery : IQuery<GetPageResponse>
     {
+        public string UserId { get; set; }
         public string StoreId { get; set; }
         public string CultureName { get; set; }
         public string Keyword { get; set; }
