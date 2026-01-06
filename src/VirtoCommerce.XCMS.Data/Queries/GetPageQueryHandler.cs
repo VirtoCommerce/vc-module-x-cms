@@ -37,7 +37,8 @@ public class GetPageQueryHandler(
         };
 
         var userManager = userManagerFactory();
-        var user = await userManager.FindByIdAsync(request.UserId);
+        var user = request.UserId != null ? await userManager.FindByIdAsync(request.UserId) : null;
+
         if (user == null)
         {
             // Filter will have the "any" value

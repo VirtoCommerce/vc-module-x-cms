@@ -7,7 +7,7 @@
   <platformVersion>3.917.0</platformVersion>
   <dependencies>
     <dependency id="VirtoCommerce.Xapi" version="3.929.0" />
-    <dependency id="VirtoCommerce.Content" version="3.835.0-alpha.1029-vcst-4380" />
+    <dependency id="VirtoCommerce.Content" version="3.836.0-alpha.1037-vcst-4380" />
     <dependency id="VirtoCommerce.Customer" version="3.846.0" />
     <dependency id="VirtoCommerce.Pages" version="3.811.0" optional="true" />
     <dependency id="VirtoCommerce.PageBuilderModule" version="3.831.0" optional="true" />
