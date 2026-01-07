@@ -115,6 +115,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
 
             var query = new GetPageQuery
             {
+                UserId = context.GetCurrentUserId(),
                 Skip = skip,
                 Take = first ?? context.PageSize ?? Connections.DefaultPageSize,
                 StoreId = context.GetArgument<string>("storeId"),
