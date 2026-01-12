@@ -76,8 +76,8 @@ public class GetPreviewBuilderPageQueryHandler(
 
         var result = AbstractTypeFactory<BuilderPageItem>.TryCreateInstance();
         result.PageId = request.PageId;
-        result.Permalink = file.Permalink;
-        result.Content = file.Content;
+        result.Permalink = file?.Permalink;
+        result.Content = file?.Content;
 
         return result;
     }
