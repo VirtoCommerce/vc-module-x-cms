@@ -65,7 +65,7 @@ public class GetPreviewBuilderPageQueryHandler(
         return pageItem;
     }
 
-    private async Task<BuilderPageItem> GetStaticContentPage(GetBuilderPageQuery request, CancellationToken cancellationToken)
+    private async Task<BuilderPageItem> GetStaticContentPage(GetBuilderPageQuery request)
     {
         if (!contentService.HasValue)
         {
