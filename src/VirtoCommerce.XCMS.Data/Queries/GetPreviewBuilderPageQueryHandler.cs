@@ -43,7 +43,7 @@ public class GetPreviewBuilderPageQueryHandler(
 
         if (!pagesEnabled)
         {
-            return await GetStaticContentPage(request, cancellationToken);
+            return await GetStaticContentPage(request);
         }
 
         if (!pageBuilderPageSearchService.HasValue)
