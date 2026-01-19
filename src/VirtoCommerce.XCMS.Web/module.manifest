@@ -45,7 +45,7 @@
   <moduleType>VirtoCommerce.XCMS.Web.Module, VirtoCommerce.XCMS.Web</moduleType>
 
   <releaseNotes>First version.</releaseNotes>
-  <copyright>Copyright © 2024–2025 VirtoCommerce. All rights reserved</copyright>
+  <copyright>Copyright © 2024–2026 VirtoCommerce. All rights reserved</copyright>
   <tags>extension module</tags>
   <useFullTypeNameInSwagger>false</useFullTypeNameInSwagger>
 </module>
