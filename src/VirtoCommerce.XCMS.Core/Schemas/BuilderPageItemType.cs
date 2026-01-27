@@ -9,6 +9,7 @@ using GraphQL.Types;
 using Microsoft.AspNetCore.Components.Web;
 using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.PageBuilderModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.XCMS.Core.Models;
@@ -29,7 +30,7 @@ public class BuilderPageItemType : ObjectGraphType<BuilderPageItem>
 
     protected virtual async Task<string> LoadContent(IResolveFieldContext<BuilderPageItem> context)
     {
-        if (_groupedPageService.HasValue)
+        if (_groupedPageService.HasValue && context.Source.Content.IsNullOrEmpty())
         {
             var pageId = context.Source.PageId;
 
@@ -39,7 +40,7 @@ public class BuilderPageItemType : ObjectGraphType<BuilderPageItem>
             }
         }
 
-        return null;
+        return context.Source.Content;
     }
 }
 

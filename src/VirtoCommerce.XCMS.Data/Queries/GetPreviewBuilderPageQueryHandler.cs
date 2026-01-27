@@ -1,10 +1,15 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using StackExchange.Redis;
+using VirtoCommerce.ContentModule.Core.Search;
+using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.PageBuilderModule.Core.Models;
 using VirtoCommerce.PageBuilderModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XCMS.Core.Models;
 using VirtoCommerce.XCMS.Core.Queries;
@@ -25,11 +30,22 @@ namespace VirtoCommerce.XCMS.Data.Queries;
 /// associated with pages.</param>
 public class GetPreviewBuilderPageQueryHandler(
     IOptionalDependency<IPageBuilderPageSearchService> pageBuilderPageSearchService,
-    IOptionalDependency<IGroupedPageSearchService> groupedPageSearchService
+    IOptionalDependency<IGroupedPageSearchService> groupedPageSearchService,
+    IOptionalDependency<IContentService> contentService,
+    IStoreService storeService
 ) : IQueryHandler<GetBuilderPageQuery, BuilderPageItem>
 {
     public async Task<BuilderPageItem> Handle(GetBuilderPageQuery request, CancellationToken cancellationToken)
     {
+        var store = await storeService.GetByIdAsync(request.StoreId);
+
+        var pagesEnabled = store.Settings.GetValue<bool>(Pages.Core.ModuleConstants.Settings.General.Enable);
+
+        if (!pagesEnabled)
+        {
+            return await GetStaticContentPage(request);
+        }
+
         if (!pageBuilderPageSearchService.HasValue)
         {
             return null;
@@ -47,6 +63,23 @@ public class GetPreviewBuilderPageQueryHandler(
         pageItem.PageId = page?.Id;
         pageItem.Permalink = group?.Permalink;
         return pageItem;
+    }
+
+    private async Task<BuilderPageItem> GetStaticContentPage(GetBuilderPageQuery request)
+    {
+        if (!contentService.HasValue)
+        {
+            return null;
+        }
+
+        var file = await contentService.Value.GetFileContentAsync(request.PageId);
+
+        var result = AbstractTypeFactory<BuilderPageItem>.TryCreateInstance();
+        result.PageId = request.PageId;
+        result.Permalink = file?.Permalink;
+        result.Content = file?.Content;
+
+        return result;
     }
 
     private async Task<(PageBuilderPage, GroupedPageBuilderPage)> GetPage(GetBuilderPageQuery request)
