@@ -7,10 +7,10 @@
   <platformVersion>3.919.0</platformVersion>
   <dependencies>
     <dependency id="VirtoCommerce.Xapi" version="3.929.0" />
-    <dependency id="VirtoCommerce.Content" version="3.837.0-alpha.1032-vcst-4500" />
+    <dependency id="VirtoCommerce.Content" version="3.837.0" />
     <dependency id="VirtoCommerce.Customer" version="3.846.0" />
     <dependency id="VirtoCommerce.Pages" version="3.811.0" optional="true" />
-    <dependency id="VirtoCommerce.PageBuilderModule" version="3.832.0-alpha.771-vcst-4500" optional="true" />
+    <dependency id="VirtoCommerce.PageBuilderModule" version="3.835.0" optional="true" />
   </dependencies>
 
   <title>CMS Experience API</title>
