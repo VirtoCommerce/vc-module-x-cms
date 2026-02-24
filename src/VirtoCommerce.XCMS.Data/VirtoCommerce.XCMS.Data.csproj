@@ -9,11 +9,6 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <ItemGroup>
-    
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.XCMS.Core\VirtoCommerce.XCMS.Core.csproj" />
   </ItemGroup>
-
 </Project>
