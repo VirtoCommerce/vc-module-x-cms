@@ -38,7 +38,7 @@
   </groups>
 
   <projectUrl>https://github.com/VirtoCommerce/vc-module-x-cms</projectUrl>
-  <iconUrl>Modules/$(VirtoCommerce.XCMS)/Content/logo.png</iconUrl>
+  <iconUrl>Modules/$(VirtoCommerce.XCMS)/Content/logo.svg</iconUrl>
   <requireLicenseAcceptance>false</requireLicenseAcceptance>
 
   <assemblyFile>VirtoCommerce.XCMS.Web.dll</assemblyFile>
