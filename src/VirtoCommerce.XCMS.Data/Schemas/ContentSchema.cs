@@ -17,11 +17,14 @@ namespace VirtoCommerce.XCMS.Data.Schemas
 {
     public class ContentSchema : ISchemaBuilder
     {
-        private readonly IMediator _mediator;
-
-        public ContentSchema(IMediator mediator)
+        public ContentSchema()
         {
-            _mediator = mediator;
+        }
+
+        [Obsolete("Use the constructor without IMediator. The mediator is resolved from context.RequestServices per request.", DiagnosticId = "VC0015", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
+        public ContentSchema(IMediator mediator)
+            : this()
+        {
         }
 
         public void Build(ISchema schema)
@@ -37,7 +40,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 Type = GraphTypeExtensionHelper.GetActualType<MenuLinkListType>(),
                 Resolver = new FuncFieldResolver<object>(async context =>
                 {
-                    var result = await _mediator.Send(new GetMenuQuery
+                    var result = await context.GetMediator().Send(new GetMenuQuery
                     {
                         StoreId = context.GetArgument<string>("storeId"),
                         CultureName = context.GetArgument<string>("cultureName"),
@@ -59,7 +62,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 Type = GraphTypeExtensionHelper.GetActualType<NonNullGraphType<ListGraphType<NonNullGraphType<MenuLinkListType>>>>(),
                 Resolver = new FuncFieldResolver<object>(async context =>
                 {
-                    var result = await _mediator.Send(new GetMenusQuery
+                    var result = await context.GetMediator().Send(new GetMenusQuery
                     {
                         StoreId = context.GetArgument<string>("storeId"),
                         CultureName = context.GetArgument<string>("cultureName"),
@@ -83,7 +86,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 {
                     context.CopyArgumentsToUserContext();
 
-                    var result = await _mediator.Send(new GetSinglePageQuery
+                    var result = await context.GetMediator().Send(new GetSinglePageQuery
                     {
                         StoreId = context.GetArgument<string>("storeId"),
                         CultureName = context.GetArgument<string>("cultureName"),
@@ -124,7 +127,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 Keyword = context.GetArgument<string>("keyword"),
             };
 
-            var response = await _mediator.Send(query);
+            var response = await context.GetMediator().Send(query);
 
             return new PagedConnection<PageItem>(response.Pages, query.Skip, query.Take, response.TotalCount);
         }
