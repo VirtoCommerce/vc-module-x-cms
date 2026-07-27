@@ -15,8 +15,18 @@ using static VirtoCommerce.Xapi.Core.ModuleConstants;
 
 namespace VirtoCommerce.XCMS.Data.Schemas
 {
-    public class PageDocumentSchema(IMediator mediator) : ISchemaBuilder
+    public class PageDocumentSchema : ISchemaBuilder
     {
+        public PageDocumentSchema()
+        {
+        }
+
+        [Obsolete("Use the constructor without IMediator. The mediator is resolved from context.RequestServices per request.", DiagnosticId = "VC0015", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
+        public PageDocumentSchema(IMediator mediator)
+            : this()
+        {
+        }
+
         public void Build(ISchema schema)
         {
             _ = schema.Query.AddField(new FieldType
@@ -30,7 +40,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 {
                     context.CopyArgumentsToUserContext();
 
-                    var result = await mediator.Send(new GetSinglePageDocumentQuery
+                    var result = await context.GetMediator().Send(new GetSinglePageDocumentQuery
                     {
                         OrganizationId = context.GetCurrentOrganizationId(),
                         UserId = context.GetCurrentUserId(),
@@ -70,7 +80,7 @@ namespace VirtoCommerce.XCMS.Data.Schemas
                 UserId = context.GetCurrentUserId(),
             };
 
-            var response = await mediator.Send(query);
+            var response = await context.GetMediator().Send(query);
 
             return new PagedConnection<PageDocument>(response.Pages, query.Skip, query.Take, response.TotalCount);
         }
