@@ -215,12 +215,12 @@ public class BuilderPageItemTypeTests : IDisposable
         });
     }
 
-    private IServiceProvider CreateRequestServices(params IPageContentProvider[] providers)
+    private ServiceProvider CreateRequestServices(params IPageContentProvider[] providers)
     {
         return CreateRequestServices(providers, logger: null);
     }
 
-    private IServiceProvider CreateRequestServices(IPageContentProvider[] providers, ILogger<BuilderPageItemType> logger)
+    private ServiceProvider CreateRequestServices(IPageContentProvider[] providers, ILogger<BuilderPageItemType> logger)
     {
         var services = new ServiceCollection();
 

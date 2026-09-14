@@ -16,8 +16,8 @@ public class BuilderPageItemType : ObjectGraphType<BuilderPageItem>
 {
     /// <summary>
     /// <see cref="IPageContentProvider.ProviderName"/> of the Page Builder content provider.
-    /// TODO: replace with VirtoCommerce.PageBuilderModule.Core.ModuleConstants.ContentProviders.PageBuilder
-    /// once a PageBuilderModule.Core package that declares it is released.
+    /// Declared locally until a PageBuilderModule.Core package that publishes
+    /// ModuleConstants.ContentProviders.PageBuilder is released; switch to that constant afterwards.
     /// </summary>
     protected const string PageBuilderProviderName = "PageBuilder";
 
@@ -33,38 +33,35 @@ public class BuilderPageItemType : ObjectGraphType<BuilderPageItem>
 
     protected virtual async Task<string> LoadContent(IResolveFieldContext<BuilderPageItem> context)
     {
-        if (_groupedPageService.HasValue && context.Source.Content.IsNullOrEmpty())
+        var pageId = context.Source.PageId;
+
+        if (!_groupedPageService.HasValue || !context.Source.Content.IsNullOrEmpty() || pageId == null)
         {
-            var pageId = context.Source.PageId;
-
-            if (pageId != null)
-            {
-                var contentProvider = GetPageBuilderContentProvider(context);
-
-                if (contentProvider != null)
-                {
-                    // Use the same resolved document as publishing and indexing. Authoring content intentionally keeps
-                    // componentRef markers, which the standalone storefront preview cannot render.
-                    var pages = await contentProvider.GetByIdsAsync([pageId]);
-                    var content = pages?.FirstOrDefault(x => x.Id.EqualsIgnoreCase(pageId))?.Content;
-
-                    if (content == null)
-                    {
-                        // The provider skips a page it cannot resolve (unknown page, missing group, malformed
-                        // componentRef marker). Preview stays empty by design, so leave a trace for diagnostics.
-                        GetLogger(context)?.LogWarning(
-                            "Page Builder content provider returned no resolved content for page '{PageId}'. The preview will be empty.",
-                            pageId);
-                    }
-
-                    return content;
-                }
-
-                return await _groupedPageService.Value.LoadContent(pageId, context.CancellationToken);
-            }
+            return context.Source.Content;
         }
 
-        return context.Source.Content;
+        var contentProvider = GetPageBuilderContentProvider(context);
+
+        if (contentProvider == null)
+        {
+            return await _groupedPageService.Value.LoadContent(pageId, context.CancellationToken);
+        }
+
+        // Use the same resolved document as publishing and indexing. Authoring content intentionally keeps
+        // componentRef markers, which the standalone storefront preview cannot render.
+        var pages = await contentProvider.GetByIdsAsync([pageId]);
+        var content = pages?.FirstOrDefault(x => x.Id.EqualsIgnoreCase(pageId))?.Content;
+
+        if (content == null)
+        {
+            // The provider skips a page it cannot resolve (unknown page, missing group, malformed
+            // componentRef marker). Preview stays empty by design, so leave a trace for diagnostics.
+            GetLogger(context)?.LogWarning(
+                "Page Builder content provider returned no resolved content for page '{PageId}'. The preview will be empty.",
+                pageId);
+        }
+
+        return content;
     }
 
     /// <summary>
