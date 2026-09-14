@@ -4,6 +4,7 @@ using GraphQL;
 using GraphQL.Types;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using VirtoCommerce.PageBuilderModule.Core;
 using VirtoCommerce.PageBuilderModule.Core.Services;
 using VirtoCommerce.Pages.Core.ContentProviders;
 using VirtoCommerce.Platform.Core.Common;
@@ -14,13 +15,6 @@ namespace VirtoCommerce.XCMS.Core.Schemas;
 
 public class BuilderPageItemType : ObjectGraphType<BuilderPageItem>
 {
-    /// <summary>
-    /// <see cref="IPageContentProvider.ProviderName"/> of the Page Builder content provider.
-    /// Declared locally until a PageBuilderModule.Core package that publishes
-    /// ModuleConstants.ContentProviders.PageBuilder is released; switch to that constant afterwards.
-    /// </summary>
-    protected const string PageBuilderProviderName = "PageBuilder";
-
     private readonly IOptionalDependency<IGroupedPageService> _groupedPageService;
 
     public BuilderPageItemType(IOptionalDependency<IGroupedPageService> groupedPageService)
@@ -74,7 +68,7 @@ public class BuilderPageItemType : ObjectGraphType<BuilderPageItem>
     {
         return context.RequestServices
             ?.GetServices<IPageContentProvider>()
-            .FirstOrDefault(x => x.ProviderName.EqualsIgnoreCase(PageBuilderProviderName));
+            .FirstOrDefault(x => x.ProviderName.EqualsIgnoreCase(ModuleConstants.ContentProviders.PageBuilder));
     }
 
     protected virtual ILogger GetLogger(IResolveFieldContext context)
