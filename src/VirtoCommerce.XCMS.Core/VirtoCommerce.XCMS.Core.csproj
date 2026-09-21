@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="VirtoCommerce.ContentModule.Core" Version="3.1003.0" />
     <PackageReference Include="VirtoCommerce.CustomerModule.Core" Version="3.1011.0" />
-    <PackageReference Include="VirtoCommerce.PageBuilderModule.Core" Version="3.1024.0-alpha.875-vcst-4933-shared-components" />
+    <PackageReference Include="VirtoCommerce.PageBuilderModule.Core" Version="3.1026.0" />
     <PackageReference Include="VirtoCommerce.Pages.Core" Version="3.1008.0" />
     <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.1015.0" />
   </ItemGroup>
