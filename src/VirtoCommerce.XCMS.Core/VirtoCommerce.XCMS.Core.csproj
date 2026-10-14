@@ -11,7 +11,12 @@
     <PackageReference Include="VirtoCommerce.ContentModule.Core" Version="3.1006.0" />
     <PackageReference Include="VirtoCommerce.CustomerModule.Core" Version="3.1028.0" />
     <PackageReference Include="VirtoCommerce.PageBuilderModule.Core" Version="3.1031.0" />
-    <PackageReference Include="VirtoCommerce.Pages.Core" Version="3.1010.0" />
+    <!-- TEMP (VCST-4935): local vc-module-pages until a release with PageDocument.TranslationGroupId. Revert to the package before the PR. -->
+    <!-- <PackageReference Include="VirtoCommerce.Pages.Core" Version="3.1010.0" /> -->
     <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.1026.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- TEMP (VCST-4935): see the commented-out Pages.Core package above. -->
+    <ProjectReference Include="..\..\..\vc-module-pages\src\VirtoCommerce.Pages.Core\VirtoCommerce.Pages.Core.csproj" />
   </ItemGroup>
 </Project>
