@@ -21,7 +21,7 @@ public class PageDocumentType : ObjectGraphType<PageDocument>
         Field(x => x.Content, nullable: false).ResolveAsync(LoadContent);
         Field(x => x.CultureName, nullable: true).Description("Page language");
         Field<NonNullGraphType<ListGraphType<NonNullGraphType<PageDocumentAlternateType>>>>("alternates")
-            .Description("Published translations of the page, including this one; empty when the page has no translations")
+            .Description("Published versions of the page in the store languages, one per language; empty when the page has no translations")
             .ResolveAsync(LoadAlternates);
     }
 
