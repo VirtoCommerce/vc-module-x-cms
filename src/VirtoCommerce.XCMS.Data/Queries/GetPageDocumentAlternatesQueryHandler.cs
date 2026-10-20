@@ -11,6 +11,7 @@ using VirtoCommerce.Pages.Core.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XCMS.Core.Models;
@@ -32,10 +33,17 @@ public class GetPageDocumentAlternatesQueryHandler(
             return [];
         }
 
+        // Without the store or with Pages turned off for it the storefront resolves none of these URLs.
+        var store = await storeService.GetNoCloneAsync(request.StoreId);
+        if (store == null || !store.Settings.GetValue<bool>(Pages.Core.ModuleConstants.Settings.General.Enable))
+        {
+            return [];
+        }
+
         // Same visibility rules as the storefront page itself: published, in date range, allowed for the user.
         var criteria = AbstractTypeFactory<PageDocumentSearchCriteria>.TryCreateInstance();
         criteria.StoreId = request.StoreId;
-        criteria.TranslationGroupId = request.TranslationGroupId;
+        criteria.TranslationGroupIds = [request.TranslationGroupId];
         criteria.Status = PageDocumentStatus.Published;
         criteria.CertainDate = DateTime.UtcNow;
         criteria.OrganizationId = request.OrganizationId;
@@ -47,16 +55,25 @@ public class GetPageDocumentAlternatesQueryHandler(
         var documents = await pageDocumentSearchService.Value.SearchAllNoCloneAsync(criteria);
 
         // A language removed from the store has no storefront URL, so its versions are not alternates.
-        var store = await storeService.GetNoCloneAsync(request.StoreId);
-        var storeLanguages = new HashSet<string>(store?.Languages ?? [], StringComparer.OrdinalIgnoreCase);
+        var storeLanguages = new HashSet<string>(store.Languages ?? [], StringComparer.OrdinalIgnoreCase);
 
         return documents
-            .Where(x => !string.IsNullOrEmpty(x.CultureName) && storeLanguages.Contains(x.CultureName))
+            .Where(x => !string.IsNullOrEmpty(x.Permalink) && !string.IsNullOrEmpty(x.CultureName) && storeLanguages.Contains(x.CultureName))
             .GroupBy(x => x.CultureName, StringComparer.OrdinalIgnoreCase)
             // One version per language is expected; if there are more, the latest one wins.
-            .Select(x => x.OrderByDescending(document => document.ModifiedDate).ThenBy(document => document.Id).First())
+            // ModifiedDate is empty for a document that was never changed, so fall back to CreatedDate.
+            .Select(x => x.OrderByDescending(document => document.ModifiedDate ?? document.CreatedDate).ThenBy(document => document.Id).First())
             .OrderBy(x => x.CultureName, StringComparer.OrdinalIgnoreCase)
-            .Select(x => new PageDocumentAlternate { Id = x.Id, CultureName = x.CultureName, Permalink = x.Permalink })
+            .Select(ToAlternate)
             .ToList();
+    }
+
+    private static PageDocumentAlternate ToAlternate(PageDocument document)
+    {
+        var alternate = AbstractTypeFactory<PageDocumentAlternate>.TryCreateInstance();
+        alternate.Id = document.Id;
+        alternate.CultureName = document.CultureName;
+        alternate.Permalink = document.Permalink;
+        return alternate;
     }
 }
