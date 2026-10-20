@@ -46,7 +46,7 @@ public class PageDocumentTypeTests : IDisposable
             new PageDocument { Id = "page", StoreId = "Store", TranslationGroupId = translationGroupId },
             mediator.Object));
 
-        Assert.Empty(Assert.IsAssignableFrom<IEnumerable<PageDocumentAlternate>>(result));
+        Assert.Empty(Assert.IsType<IEnumerable<PageDocumentAlternate>>(result, exactMatch: false));
     }
 
     [Fact]
