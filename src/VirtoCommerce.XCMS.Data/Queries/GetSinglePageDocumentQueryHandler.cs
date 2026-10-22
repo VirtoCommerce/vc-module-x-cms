@@ -31,6 +31,9 @@ public class GetSinglePageDocumentQueryHandler(
 
         var criteria = AbstractTypeFactory<PageDocumentSearchCriteria>.TryCreateInstance();
         criteria.ObjectIds = [request.Id];
+        // Opening a page by id must not reveal a page made for another organization.
+        criteria.OrganizationId = request.OrganizationId;
+        criteria.FilterByOrganization = true;
         criteria.Take = 1;
         criteria.Skip = 0;
         criteria.CertainDate = DateTime.UtcNow;
