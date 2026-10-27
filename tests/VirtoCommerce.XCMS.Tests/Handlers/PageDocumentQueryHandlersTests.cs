@@ -45,6 +45,27 @@ namespace VirtoCommerce.XCMS.Tests.Handlers
             searched.FilterByOrganization.Should().BeTrue();
             searched.OrganizationId.Should().Be(organizationId);
             searched.ObjectIds.Should().Equal("page");
+        }
+
+        [Fact]
+        public async Task GetPageDocuments_ReturnsPublishedPagesOnly()
+        {
+            PageDocumentSearchCriteria searched = null;
+            var handler = new GetPageDocumentQueryHandler(SearchService(x => searched = x), UserManagerFactory(), Mock.Of<IMemberService>());
+
+            await handler.Handle(new GetPageDocumentsQuery { StoreId = "store" }, CancellationToken.None);
+
+            searched.Status.Should().Be(PageDocumentStatus.Published);
+        }
+
+        [Fact]
+        public async Task GetSinglePageDocument_ReturnsPublishedPagesOnly()
+        {
+            PageDocumentSearchCriteria searched = null;
+            var handler = new GetSinglePageDocumentQueryHandler(SearchService(x => searched = x), UserManagerFactory(), Mock.Of<IMemberService>());
+
+            await handler.Handle(new GetSinglePageDocumentQuery { Id = "page" }, CancellationToken.None);
+
             searched.Status.Should().Be(PageDocumentStatus.Published);
         }
 
