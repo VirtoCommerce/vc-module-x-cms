@@ -33,8 +33,6 @@ public class GetPageDocumentQueryHandler(IOptionalDependency<IPageDocumentSearch
         criteria.LanguageCode = request.CultureName;
         criteria.Keyword = request.Keyword;
         criteria.OrganizationId = request.OrganizationId;
-        // A visitor without an organization must not find pages made for one.
-        criteria.FilterByOrganization = true;
         criteria.Take = request.Take;
         criteria.Skip = request.Skip;
         criteria.CertainDate = DateTime.UtcNow;
