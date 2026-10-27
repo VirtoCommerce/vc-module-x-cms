@@ -34,6 +34,8 @@ public class GetSinglePageDocumentQueryHandler(
         // Opening a page by id must not reveal a page made for another organization.
         criteria.OrganizationId = request.OrganizationId;
         criteria.FilterByOrganization = true;
+        // Like the pageDocuments search: drafts and archived pages are not for the storefront, even by id.
+        criteria.Status = PageDocumentStatus.Published;
         criteria.Take = 1;
         criteria.Skip = 0;
         criteria.CertainDate = DateTime.UtcNow;

@@ -45,6 +45,7 @@ namespace VirtoCommerce.XCMS.Tests.Handlers
             searched.FilterByOrganization.Should().BeTrue();
             searched.OrganizationId.Should().Be(organizationId);
             searched.ObjectIds.Should().Equal("page");
+            searched.Status.Should().Be(PageDocumentStatus.Published);
         }
 
         private static IOptionalDependency<IPageDocumentSearchService> SearchService(System.Action<PageDocumentSearchCriteria> onSearch)
