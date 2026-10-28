@@ -17,6 +17,7 @@ using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.XCMS.Core.Queries;
 using VirtoCommerce.XCMS.Data.Queries;
 using Xunit;
+using static VirtoCommerce.Xapi.Core.ModuleConstants;
 
 namespace VirtoCommerce.XCMS.Tests.Handlers
 {
@@ -204,7 +205,9 @@ namespace VirtoCommerce.XCMS.Tests.Handlers
                 () => throw new InvalidOperationException("The user must not be looked up"), Mock.Of<IMemberService>(), storeService.Object);
 
             // Act
-            await handler.Handle(new GetPageDocumentAlternatesQuery { StoreId = "Store", TranslationGroupId = "faq" }, CancellationToken.None);
+            await handler.Handle(
+                new GetPageDocumentAlternatesQuery { StoreId = "Store", TranslationGroupId = "faq", UserId = AnonymousUser.UserName },
+                CancellationToken.None);
 
             // Assert
             criteria.UserGroups.Should().BeEmpty();
