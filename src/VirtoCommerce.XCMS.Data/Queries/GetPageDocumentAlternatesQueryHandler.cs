@@ -48,8 +48,10 @@ public class GetPageDocumentAlternatesQueryHandler(
         criteria.CertainDate = DateTime.UtcNow;
         criteria.OrganizationId = request.OrganizationId;
 
-        var userManager = userManagerFactory();
-        var user = userManager.Users.FirstOrDefault(x => x.Id == request.UserId);
+        // An anonymous visitor has no user to look up.
+        var user = string.IsNullOrEmpty(request.UserId)
+            ? null
+            : userManagerFactory().Users.FirstOrDefault(x => x.Id == request.UserId);
         await criteria.EnrichAuth(user, memberService);
 
         var documents = await pageDocumentSearchService.Value.SearchAllNoCloneAsync(criteria);

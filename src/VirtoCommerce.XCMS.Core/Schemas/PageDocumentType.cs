@@ -5,12 +5,13 @@ using GraphQL;
 using GraphQL.Types;
 using VirtoCommerce.Pages.Core.Models;
 using VirtoCommerce.Xapi.Core.Extensions;
+using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.XCMS.Core.Models;
 using VirtoCommerce.XCMS.Core.Queries;
 
 namespace VirtoCommerce.XCMS.Core.Schemas;
 
-public class PageDocumentType : ObjectGraphType<PageDocument>
+public class PageDocumentType : ExtendableGraphType<PageDocument>
 {
     public PageDocumentType()
     {
@@ -20,9 +21,9 @@ public class PageDocumentType : ObjectGraphType<PageDocument>
         Field(x => x.Permalink, nullable: true).Description("Page permalink");
         Field(x => x.Content, nullable: false).ResolveAsync(LoadContent);
         Field(x => x.CultureName, nullable: true).Description("Page language");
-        Field<NonNullGraphType<ListGraphType<NonNullGraphType<PageDocumentAlternateType>>>>("alternates")
-            .Description("Published versions of the page in the store languages, one per language; empty when the page has no translations. Resolved per page with a separate search, so do not select it in page lists")
-            .ResolveAsync(LoadAlternates);
+        ExtendableFieldAsync<NonNullGraphType<ListGraphType<NonNullGraphType<PageDocumentAlternateType>>>>("alternates",
+            "Published versions of the page in the store languages, one per language. Each page runs its own search: do not select it in page lists",
+            resolve: LoadAlternates);
     }
 
     protected virtual async Task<object> LoadAlternates(IResolveFieldContext<PageDocument> context)

@@ -183,6 +183,33 @@ namespace VirtoCommerce.XCMS.Tests.Handlers
             result.Should().BeEmpty();
         }
 
+        [Fact]
+        public async Task Handle_Anonymous_DoesNotLookUpTheUser()
+        {
+            // Arrange
+            PageDocumentSearchCriteria criteria = null;
+            var search = new Mock<IPageDocumentSearchService>();
+            search
+                .Setup(x => x.SearchAsync(It.IsAny<PageDocumentSearchCriteria>(), It.IsAny<bool>()))
+                .Callback<PageDocumentSearchCriteria, bool>((c, _) => criteria = c)
+                .ReturnsAsync(new PageDocumentSearchResult { Results = [] });
+            var dependency = new Mock<IOptionalDependency<IPageDocumentSearchService>>();
+            dependency.Setup(x => x.HasValue).Returns(true);
+            dependency.Setup(x => x.Value).Returns(search.Object);
+            var storeService = new Mock<IStoreService>();
+            storeService
+                .Setup(x => x.GetAsync(It.IsAny<IList<string>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync([CreateStore()]);
+            var handler = new GetPageDocumentAlternatesQueryHandler(dependency.Object,
+                () => throw new InvalidOperationException("The user must not be looked up"), Mock.Of<IMemberService>(), storeService.Object);
+
+            // Act
+            await handler.Handle(new GetPageDocumentAlternatesQuery { StoreId = "Store", TranslationGroupId = "faq" }, CancellationToken.None);
+
+            // Assert
+            criteria.UserGroups.Should().BeEmpty();
+        }
+
         private static IPageDocumentSearchService SearchReturning(params PageDocument[] documents)
         {
             var search = new Mock<IPageDocumentSearchService>();
