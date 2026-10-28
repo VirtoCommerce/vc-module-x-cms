@@ -49,11 +49,7 @@ public class GetPageDocumentAlternatesQueryHandler(
         criteria.CertainDate = DateTime.UtcNow;
         criteria.OrganizationId = request.OrganizationId;
 
-        // An anonymous visitor has no user to look up; xAPI sends AnonymousUser.UserName as the user id.
-        var user = string.IsNullOrEmpty(request.UserId) || request.UserId == AnonymousUser.UserName
-            ? null
-            : userManagerFactory().Users.FirstOrDefault(x => x.Id == request.UserId);
-        await criteria.EnrichAuth(user, memberService);
+        await criteria.EnrichAuth(FindUser(request.UserId), memberService);
 
         var documents = await pageDocumentSearchService.Value.SearchAllNoCloneAsync(criteria);
 
@@ -69,6 +65,17 @@ public class GetPageDocumentAlternatesQueryHandler(
             .OrderBy(x => x.CultureName, StringComparer.OrdinalIgnoreCase)
             .Select(ToAlternate)
             .ToList();
+    }
+
+    private ApplicationUser FindUser(string userId)
+    {
+        // An anonymous visitor has no user to look up; xAPI sends AnonymousUser.UserName as the user id.
+        if (string.IsNullOrEmpty(userId) || userId == AnonymousUser.UserName)
+        {
+            return null;
+        }
+
+        return userManagerFactory().Users.FirstOrDefault(x => x.Id == userId);
     }
 
     private static PageDocumentAlternate ToAlternate(PageDocument document)
