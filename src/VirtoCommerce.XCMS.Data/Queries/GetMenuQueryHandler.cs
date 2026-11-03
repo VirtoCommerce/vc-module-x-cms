@@ -28,26 +28,33 @@ namespace VirtoCommerce.XCMS.Data.Queries
             criteria.StoreId = request.StoreId;
 
             var menuLinkLists = await _menuLinkListSearchService.SearchAllAsync(criteria);
-            var menuLinkList = GetMenuLinkList(menuLinkLists, request.CultureName, request.Name);
-
-            if (menuLinkList != null)
-            {
-                var expMenuLinkList = new Menu
-                {
-                    Name = menuLinkList.Name,
-                    OuterId = menuLinkList.OuterId,
-                };
-
-                foreach (var menuLink in menuLinkList.MenuLinks)
-                {
-                    var childMenuLinkList = GetMenuLinkList(menuLinkLists, request.CultureName, menuLink.Title);
-                    expMenuLinkList.Items.Add(GetMenuLink(menuLink, childMenuLinkList));
-                }
-
-                result.MenuList = expMenuLinkList;
-            }
+            result.MenuList = ToMenu(menuLinkLists, request.CultureName, request.Name);
 
             return result;
+        }
+
+        /// <summary>The list with that name in that language, with a link's children from the list named after it; <c>null</c> when there is none.</summary>
+        internal static Menu ToMenu(IList<MenuLinkList> menuLinkLists, string cultureName, string name)
+        {
+            var menuLinkList = GetMenuLinkList(menuLinkLists, cultureName, name);
+            if (menuLinkList == null)
+            {
+                return null;
+            }
+
+            var expMenuLinkList = new Menu
+            {
+                Name = menuLinkList.Name,
+                OuterId = menuLinkList.OuterId,
+            };
+
+            foreach (var menuLink in menuLinkList.MenuLinks)
+            {
+                var childMenuLinkList = GetMenuLinkList(menuLinkLists, cultureName, menuLink.Title);
+                expMenuLinkList.Items.Add(GetMenuLink(menuLink, childMenuLinkList));
+            }
+
+            return expMenuLinkList;
         }
 
         private static MenuLinkList GetMenuLinkList(IEnumerable<MenuLinkList> lists, string cultureName, string name)

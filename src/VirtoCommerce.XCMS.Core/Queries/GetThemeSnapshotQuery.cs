@@ -1,0 +1,16 @@
+using VirtoCommerce.Xapi.Core.Infrastructure;
+using VirtoCommerce.XCMS.Core.Models;
+
+namespace VirtoCommerce.XCMS.Core.Queries;
+
+public class GetThemeSnapshotQuery : IQuery<ThemeSnapshotResult>
+{
+    /// <summary>The store by domain, as for pageContext.</summary>
+    public string Domain { get; set; }
+
+    /// <summary>The store by id; wins over <see cref="Domain"/>.</summary>
+    public string StoreId { get; set; }
+
+    /// <summary>The language asked for; the store's closest language is served.</summary>
+    public string CultureName { get; set; }
+}
