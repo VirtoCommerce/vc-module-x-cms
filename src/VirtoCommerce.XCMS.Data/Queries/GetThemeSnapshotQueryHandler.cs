@@ -6,7 +6,6 @@ using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.PageBuilderModule.Core.Theme;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.Xapi.Core.Models;
 using VirtoCommerce.Xapi.Core.Services;
@@ -16,22 +15,17 @@ using VirtoCommerce.XCMS.Core.Queries;
 namespace VirtoCommerce.XCMS.Data.Queries;
 
 /// <summary>
-/// The store found as pageContext finds it, its published Page Builder theme, and the menus the theme names, read on
-/// every request so that a menu edited in Content shows without a new publication.
+/// A store's published Page Builder theme with the menus it names. The menus are read on every request so that a menu
+/// edited in Content shows without a new publication.
 /// </summary>
 public class GetThemeSnapshotQueryHandler(
     IStoreDomainResolverService storeDomainResolverService,
     IMenuLinkListSearchService menuLinkListSearchService,
-    IOptionalDependency<IThemeSnapshotService> themeSnapshotService)
+    IThemeSnapshotService themeSnapshotService)
     : IQueryHandler<GetThemeSnapshotQuery, ThemeSnapshotResult>
 {
-    public async Task<ThemeSnapshotResult> Handle(GetThemeSnapshotQuery request, CancellationToken cancellationToken)
+    public virtual async Task<ThemeSnapshotResult> Handle(GetThemeSnapshotQuery request, CancellationToken cancellationToken)
     {
-        if (!themeSnapshotService.HasValue)
-        {
-            return null;
-        }
-
         var storeRequest = AbstractTypeFactory<StoreDomainRequest>.TryCreateInstance();
         storeRequest.StoreId = request.StoreId;
         storeRequest.Domain = request.Domain;
@@ -41,23 +35,23 @@ public class GetThemeSnapshotQueryHandler(
             return null;
         }
 
-        var snapshot = await themeSnapshotService.Value.GetPublishedAsync(store.Id, request.CultureName, cancellationToken);
+        var snapshot = await themeSnapshotService.GetPublishedAsync(store.Id, request.CultureName, cancellationToken);
         if (snapshot == null)
         {
             return null;
         }
 
-        return new ThemeSnapshotResult
-        {
-            StoreId = snapshot.StoreId,
-            CultureName = snapshot.CultureName,
-            Publication = snapshot.Publication,
-            Content = snapshot.Content,
-            Menus = await GetMenusAsync(snapshot),
-        };
+        var result = AbstractTypeFactory<ThemeSnapshotResult>.TryCreateInstance();
+        result.StoreId = snapshot.StoreId;
+        result.CultureName = snapshot.CultureName;
+        result.Publication = snapshot.Publication;
+        result.Content = snapshot.Content;
+        result.Menus = await GetMenusAsync(snapshot);
+
+        return result;
     }
 
-    private async Task<IList<Menu>> GetMenusAsync(ThemeSnapshot snapshot)
+    protected virtual async Task<IList<Menu>> GetMenusAsync(ThemeSnapshot snapshot)
     {
         if (snapshot.Menus.Count == 0)
         {

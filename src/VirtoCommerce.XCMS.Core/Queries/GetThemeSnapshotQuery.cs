@@ -5,7 +5,7 @@ namespace VirtoCommerce.XCMS.Core.Queries;
 
 public class GetThemeSnapshotQuery : IQuery<ThemeSnapshotResult>
 {
-    /// <summary>The store by domain, as for pageContext.</summary>
+    /// <summary>The store by domain, used when <see cref="StoreId"/> is empty.</summary>
     public string Domain { get; set; }
 
     /// <summary>The store by id; wins over <see cref="Domain"/>.</summary>

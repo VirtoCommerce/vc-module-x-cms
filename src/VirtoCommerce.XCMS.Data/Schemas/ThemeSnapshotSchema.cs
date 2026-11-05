@@ -1,5 +1,6 @@
 using GraphQL.Resolvers;
 using GraphQL.Types;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.Xapi.Core.Infrastructure;
@@ -9,8 +10,7 @@ using VirtoCommerce.XCMS.Core.Schemas;
 namespace VirtoCommerce.XCMS.Data.Schemas;
 
 /// <summary>
-/// The published Page Builder theme a storefront requests from index.html before its JavaScript loads: anonymous,
-/// the same for every visitor; null when the store has the New Page Builder setting off.
+/// A store's published Page Builder theme. Anonymous, because the theme is the same for every visitor.
 /// </summary>
 public class ThemeSnapshotSchema : ISchemaBuilder
 {
@@ -26,12 +26,14 @@ public class ThemeSnapshotSchema : ISchemaBuilder
             ),
             Type = GraphTypeExtensionHelper.GetActualType<ThemeSnapshotType>(),
             Resolver = new FuncFieldResolver<object>(async context =>
-                await context.GetMediator().Send(new GetThemeSnapshotQuery
-                {
-                    Domain = context.GetArgument<string>("domain"),
-                    StoreId = context.GetArgument<string>("storeId"),
-                    CultureName = context.GetArgument<string>("cultureName"),
-                })),
+            {
+                var query = AbstractTypeFactory<GetThemeSnapshotQuery>.TryCreateInstance();
+                query.Domain = context.GetArgument<string>("domain");
+                query.StoreId = context.GetArgument<string>("storeId");
+                query.CultureName = context.GetArgument<string>("cultureName");
+
+                return await context.GetMediator().Send(query);
+            }),
         });
     }
 }

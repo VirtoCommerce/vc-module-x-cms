@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +6,6 @@ using Moq;
 using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.PageBuilderModule.Core.Theme;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.Xapi.Core.Models;
 using VirtoCommerce.Xapi.Core.Services;
@@ -15,128 +13,151 @@ using VirtoCommerce.XCMS.Core.Queries;
 using VirtoCommerce.XCMS.Data.Queries;
 using Xunit;
 
-namespace VirtoCommerce.XCMS.Tests.Handlers
+namespace VirtoCommerce.XCMS.Tests.Handlers;
+
+public class GetThemeSnapshotQueryHandlerTests
 {
-    public class GetThemeSnapshotQueryHandlerTests
+    private const string StoreId = "B2B-store";
+
+    [Fact]
+    public async Task Handle_FindsTheStoreByDomain_AndReturnsItsSnapshot()
     {
-        [Fact]
-        public async Task Handle_FindsTheStoreAsPageContextDoes_AndReturnsItsSnapshot()
-        {
-            // Arrange
-            StoreDomainRequest storeRequest = null;
-            var stores = new Mock<IStoreDomainResolverService>();
-            stores
-                .Setup(x => x.GetStoreAsync(It.IsAny<StoreDomainRequest>()))
-                .Callback<StoreDomainRequest>(x => storeRequest = x)
-                .ReturnsAsync(new Store { Id = "B2B-store" });
-            var snapshots = new Mock<IThemeSnapshotService>();
-            snapshots
-                .Setup(x => x.GetPublishedAsync("B2B-store", "de", It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new ThemeSnapshot("B2B-store", "de-DE", 4, "{\"format\":1}", []));
+        // Arrange
+        StoreDomainRequest storeRequest = null;
+        var stores = new Mock<IStoreDomainResolverService>();
+        stores
+            .Setup(x => x.GetStoreAsync(It.IsAny<StoreDomainRequest>()))
+            .Callback<StoreDomainRequest>(x => storeRequest = x)
+            .ReturnsAsync(new Store { Id = StoreId });
+        var snapshots = new Mock<IThemeSnapshotService>();
+        snapshots
+            .Setup(x => x.GetPublishedAsync(StoreId, "de", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ThemeSnapshot(StoreId, "de-DE", 4, "{\"format\":1}", []));
 
-            // Act
-            var result = await CreateHandler(stores.Object, snapshots.Object, Menus()).Handle(
-                new GetThemeSnapshotQuery { Domain = "shop.example.com", CultureName = "de" },
-                CancellationToken.None);
+        // Act
+        var result = await CreateHandler(stores.Object, snapshots.Object, new Mock<IMenuLinkListSearchService>(MockBehavior.Strict).Object).Handle(
+            new GetThemeSnapshotQuery { Domain = "shop.example.com", CultureName = "de" },
+            CancellationToken.None);
 
-            // Assert
-            storeRequest.Domain.Should().Be("shop.example.com");
-            storeRequest.StoreId.Should().BeNull();
-            result.StoreId.Should().Be("B2B-store");
-            result.CultureName.Should().Be("de-DE");
-            result.Publication.Should().Be(4);
-            result.Content.Should().Be("{\"format\":1}");
-            result.Menus.Should().BeEmpty();
-        }
+        // Assert
+        storeRequest.Domain.Should().Be("shop.example.com");
+        storeRequest.StoreId.Should().BeNull();
+        result.StoreId.Should().Be(StoreId);
+        result.CultureName.Should().Be("de-DE");
+        result.Publication.Should().Be(4);
+        result.Content.Should().Be("{\"format\":1}");
+        result.Menus.Should().BeEmpty();
+    }
 
-        [Fact]
-        public async Task Handle_ReturnsTheMenusTheSnapshotNames_InTheServedLanguage_UnderTheNamesItHolds()
-        {
-            // Arrange
-            var snapshots = new Mock<IThemeSnapshotService>();
-            snapshots
-                .Setup(x => x.GetPublishedAsync("B2B-store", null, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new ThemeSnapshot("B2B-store", "de-DE", 1, "{}", ["main-menu", "gone"]));
-            var menus = Menus(
-                List("Main-Menu", "de-DE", "Shop"),
-                List("main-menu", "en-US", "Store"),
-                List("Shop", "de-DE", "Neu"));
+    [Fact]
+    public async Task Handle_PassesTheStoreIdToTheStoreLookup()
+    {
+        // Arrange
+        StoreDomainRequest storeRequest = null;
+        var stores = new Mock<IStoreDomainResolverService>();
+        stores
+            .Setup(x => x.GetStoreAsync(It.IsAny<StoreDomainRequest>()))
+            .Callback<StoreDomainRequest>(x => storeRequest = x)
+            .ReturnsAsync(new Store { Id = StoreId });
 
-            // Act
-            var result = await CreateHandler(Store(), snapshots.Object, menus).Handle(new GetThemeSnapshotQuery { StoreId = "B2B-store" }, CancellationToken.None);
+        // Act
+        await CreateHandler(stores.Object, Snapshots(new ThemeSnapshot(StoreId, "en-US", 1, "{}", [])), Menus())
+            .Handle(new GetThemeSnapshotQuery { StoreId = StoreId, Domain = "shop.example.com" }, CancellationToken.None);
 
-            // Assert
-            result.Menus.Should().ContainSingle();
-            result.Menus[0].Name.Should().Be("main-menu");
-            result.Menus[0].Items.Select(x => x.Link.Title).Should().Equal("Shop");
-            result.Menus[0].Items[0].ChildItems.Select(x => x.Link.Title).Should().Equal("Neu");
-        }
+        // Assert
+        storeRequest.StoreId.Should().Be(StoreId);
+        storeRequest.Domain.Should().Be("shop.example.com");
+    }
 
-        [Fact]
-        public async Task Handle_WithTheNewPageBuilderOff_ReturnsNull()
-        {
-            // Arrange
-            var snapshots = new Mock<IThemeSnapshotService>();
-            snapshots
-                .Setup(x => x.GetPublishedAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((ThemeSnapshot)null);
+    [Fact]
+    public async Task Handle_ReturnsTheStoreMenusTheSnapshotNames_InTheServedLanguage_UnderTheNamesItHolds()
+    {
+        // Arrange
+        var menus = Menus(
+            List("Other-store", "main-menu", "de-DE", "Fremd"),
+            List(StoreId, "Main-Menu", "de-DE", "Shop"),
+            List(StoreId, "main-menu", "en-US", "Store"),
+            List(StoreId, "Shop", "de-DE", "Neu"));
 
-            // Act
-            var result = await CreateHandler(Store(), snapshots.Object, new Mock<IMenuLinkListSearchService>(MockBehavior.Strict).Object)
-                .Handle(new GetThemeSnapshotQuery { Domain = "shop.example.com" }, CancellationToken.None);
+        // Act
+        var result = await CreateHandler(Store(), Snapshots(new ThemeSnapshot(StoreId, "de-DE", 1, "{}", ["main-menu", "gone"])), menus)
+            .Handle(new GetThemeSnapshotQuery { Domain = "shop.example.com" }, CancellationToken.None);
 
-            // Assert
-            result.Should().BeNull();
-        }
+        // Assert
+        result.Menus.Should().ContainSingle();
+        result.Menus[0].Name.Should().Be("main-menu");
+        result.Menus[0].Items.Select(x => x.Link.Title).Should().Equal("Shop");
+        result.Menus[0].Items[0].ChildItems.Select(x => x.Link.Title).Should().Equal("Neu");
+    }
 
-        [Fact]
-        public async Task Handle_WithoutPageBuilder_ReturnsNullWithoutLookingUpTheStore()
-        {
-            // Arrange
-            var dependency = new Mock<IOptionalDependency<IThemeSnapshotService>>();
-            dependency.Setup(x => x.HasValue).Returns(false);
-            var handler = new GetThemeSnapshotQueryHandler(
-                new Mock<IStoreDomainResolverService>(MockBehavior.Strict).Object,
-                new Mock<IMenuLinkListSearchService>(MockBehavior.Strict).Object,
-                dependency.Object);
+    [Fact]
+    public async Task Handle_WithoutTheStore_ReturnsNull()
+    {
+        // Arrange
+        var stores = new Mock<IStoreDomainResolverService>();
+        stores.Setup(x => x.GetStoreAsync(It.IsAny<StoreDomainRequest>())).ReturnsAsync((Store)null);
 
-            // Act
-            var result = await handler.Handle(new GetThemeSnapshotQuery { Domain = "shop.example.com" }, CancellationToken.None);
+        // Act
+        var result = await CreateHandler(
+                stores.Object,
+                new Mock<IThemeSnapshotService>(MockBehavior.Strict).Object,
+                new Mock<IMenuLinkListSearchService>(MockBehavior.Strict).Object)
+            .Handle(new GetThemeSnapshotQuery { Domain = "unknown.example.com" }, CancellationToken.None);
 
-            // Assert
-            result.Should().BeNull();
-        }
+        // Assert
+        result.Should().BeNull();
+    }
 
-        private static IStoreDomainResolverService Store()
-        {
-            var stores = new Mock<IStoreDomainResolverService>();
-            stores.Setup(x => x.GetStoreAsync(It.IsAny<StoreDomainRequest>())).ReturnsAsync(new Store { Id = "B2B-store" });
-            return stores.Object;
-        }
+    [Fact]
+    public async Task Handle_WithTheNewPageBuilderOff_ReturnsNull()
+    {
+        // Act
+        var result = await CreateHandler(Store(), Snapshots(null), new Mock<IMenuLinkListSearchService>(MockBehavior.Strict).Object)
+            .Handle(new GetThemeSnapshotQuery { Domain = "shop.example.com" }, CancellationToken.None);
 
-        private static MenuLinkList List(string name, string language, params string[] titles) => new()
-        {
-            Name = name,
-            Language = language,
-            StoreId = "B2B-store",
-            MenuLinks = titles.Select(x => new MenuLink { Title = x, Url = $"/{x}" }).ToList(),
-        };
+        // Assert
+        result.Should().BeNull();
+    }
 
-        private static IMenuLinkListSearchService Menus(params MenuLinkList[] lists)
-        {
-            var search = new Mock<IMenuLinkListSearchService>();
-            search
-                .Setup(x => x.SearchAsync(It.IsAny<MenuLinkListSearchCriteria>(), It.IsAny<bool>()))
-                .ReturnsAsync(new MenuLinkListSearchResult { TotalCount = lists.Length, Results = lists.ToList() });
-            return search.Object;
-        }
+    private static IStoreDomainResolverService Store()
+    {
+        var stores = new Mock<IStoreDomainResolverService>();
+        stores.Setup(x => x.GetStoreAsync(It.IsAny<StoreDomainRequest>())).ReturnsAsync(new Store { Id = StoreId });
+        return stores.Object;
+    }
 
-        private static GetThemeSnapshotQueryHandler CreateHandler(IStoreDomainResolverService stores, IThemeSnapshotService snapshots, IMenuLinkListSearchService menus)
-        {
-            var dependency = new Mock<IOptionalDependency<IThemeSnapshotService>>();
-            dependency.Setup(x => x.HasValue).Returns(true);
-            dependency.Setup(x => x.Value).Returns(snapshots);
-            return new GetThemeSnapshotQueryHandler(stores, menus, dependency.Object);
-        }
+    private static IThemeSnapshotService Snapshots(ThemeSnapshot snapshot)
+    {
+        var snapshots = new Mock<IThemeSnapshotService>();
+        snapshots
+            .Setup(x => x.GetPublishedAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(snapshot);
+        return snapshots.Object;
+    }
+
+    private static MenuLinkList List(string storeId, string name, string language, params string[] titles) => new()
+    {
+        Name = name,
+        Language = language,
+        StoreId = storeId,
+        MenuLinks = titles.Select(x => new MenuLink { Title = x, Url = $"/{x}" }).ToList(),
+    };
+
+    private static IMenuLinkListSearchService Menus(params MenuLinkList[] lists)
+    {
+        var search = new Mock<IMenuLinkListSearchService>();
+        search
+            .Setup(x => x.SearchAsync(It.IsAny<MenuLinkListSearchCriteria>(), It.IsAny<bool>()))
+            .ReturnsAsync((MenuLinkListSearchCriteria criteria, bool _) =>
+            {
+                var results = lists.Where(x => x.StoreId == criteria.StoreId).ToList();
+                return new MenuLinkListSearchResult { TotalCount = results.Count, Results = results };
+            });
+        return search.Object;
+    }
+
+    private static GetThemeSnapshotQueryHandler CreateHandler(IStoreDomainResolverService stores, IThemeSnapshotService snapshots, IMenuLinkListSearchService menus)
+    {
+        return new GetThemeSnapshotQueryHandler(stores, menus, snapshots);
     }
 }
