@@ -26,7 +26,7 @@ namespace VirtoCommerce.XCMS.Data.Queries;
 /// <summary>
 /// A store's published Page Builder theme with the menus it names and what is at the permalink asked for. The menus and
 /// the permalink are read on every request, outside the cached snapshot, so a menu edited in Content shows without a new
-/// publication. The permalink is looked up while the snapshot is read.
+/// publication. The permalink is looked up in the language the snapshot is served in.
 /// </summary>
 public class GetThemeSnapshotQueryHandler(
     IStoreDomainResolverService storeDomainResolverService,
@@ -61,23 +61,7 @@ public class GetThemeSnapshotQueryHandler(
             return null;
         }
 
-        var snapshotTask = themeSnapshotService.GetPublishedAsync(store.Id, request.CultureName, cancellationToken);
-        var slugTask = GetSlugAsync(store, request, snapshotTask, cancellationToken);
-
-        ThemeSnapshot snapshot;
-        try
-        {
-            snapshot = await snapshotTask;
-        }
-        finally
-        {
-            // Never left running past the request, whose services the lookup uses.
-            if (!snapshotTask.IsCompletedSuccessfully || snapshotTask.Result == null)
-            {
-                await slugTask;
-            }
-        }
-
+        var snapshot = await themeSnapshotService.GetPublishedAsync(store.Id, request.CultureName, cancellationToken);
         if (snapshot == null)
         {
             return null;
@@ -89,7 +73,7 @@ public class GetThemeSnapshotQueryHandler(
         result.Publication = snapshot.Publication;
         result.Content = snapshot.Content;
         result.Menus = await GetMenusAsync(snapshot);
-        result.Slug = await slugTask;
+        result.Slug = await GetSlugAsync(store, request, snapshot, cancellationToken);
 
         return result;
     }
@@ -118,11 +102,11 @@ public class GetThemeSnapshotQueryHandler(
     }
 
     /// <summary>
-    /// Looks the permalink up with the storefront's <c>slugInfo</c> query, for an anonymous visitor, and reads a content
-    /// page found there once the snapshot is there: a store without a snapshot gets no page read. Null without a
-    /// permalink, with nothing at the permalink (or a redirect) and when the lookup fails.
+    /// Looks the permalink up with the storefront's <c>slugInfo</c> query, for an anonymous visitor in the language served
+    /// (a URL may name only its language part), and reads a content page found there. Null without a permalink, with
+    /// nothing at the permalink (or a redirect) and when the lookup fails.
     /// </summary>
-    protected virtual async Task<ThemeSnapshotSlug> GetSlugAsync(Store store, GetThemeSnapshotQuery request, Task<ThemeSnapshot> snapshotTask, CancellationToken cancellationToken)
+    protected virtual async Task<ThemeSnapshotSlug> GetSlugAsync(Store store, GetThemeSnapshotQuery request, ThemeSnapshot snapshot, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(request.Permalink))
         {
@@ -134,7 +118,7 @@ public class GetThemeSnapshotQueryHandler(
             var slugQuery = AbstractTypeFactory<SlugInfoQuery>.TryCreateInstance();
             slugQuery.Permalink = request.Permalink;
             slugQuery.StoreId = store.Id;
-            slugQuery.CultureName = request.CultureName;
+            slugQuery.CultureName = snapshot.CultureName;
             var slugInfo = await mediator.Send(slugQuery, cancellationToken);
 
             var entity = slugInfo?.EntityInfo;
@@ -146,7 +130,7 @@ public class GetThemeSnapshotQueryHandler(
             var slug = AbstractTypeFactory<ThemeSnapshotSlug>.TryCreateInstance();
             slug.ObjectType = entity.ObjectType;
             slug.ObjectId = entity.ObjectId;
-            slug.Page = await GetSlugPageAsync(store, request, slug, snapshotTask, cancellationToken);
+            slug.Page = await GetSlugPageAsync(store, slug, snapshot, cancellationToken);
 
             return slug;
         }
@@ -161,17 +145,9 @@ public class GetThemeSnapshotQueryHandler(
     /// Reads a content page at the permalink with the storefront's <c>pageDocument</c> and <c>page</c> queries, keeping
     /// only the settings that choose its template and layout. Null for other object types and a page not found.
     /// </summary>
-    protected virtual async Task<ThemeSnapshotSlugPage> GetSlugPageAsync(Store store, GetThemeSnapshotQuery request, ThemeSnapshotSlug slug, Task<ThemeSnapshot> snapshotTask, CancellationToken cancellationToken)
+    protected virtual async Task<ThemeSnapshotSlugPage> GetSlugPageAsync(Store store, ThemeSnapshotSlug slug, ThemeSnapshot snapshot, CancellationToken cancellationToken)
     {
         if (slug.ObjectType is not (PagesObjectType or ContentFileObjectType))
-        {
-            return null;
-        }
-
-        // A failed snapshot read fails the request on its own.
-        await Task.WhenAny(snapshotTask);
-        var snapshot = snapshotTask.IsCompletedSuccessfully ? snapshotTask.Result : null;
-        if (snapshot == null)
         {
             return null;
         }
@@ -197,7 +173,7 @@ public class GetThemeSnapshotQueryHandler(
                 }
             case ContentFileObjectType:
                 {
-                    var file = await mediator.Send(new GetSinglePageQuery { StoreId = store.Id, CultureName = request.CultureName, Id = slug.ObjectId }, cancellationToken);
+                    var file = await mediator.Send(new GetSinglePageQuery { StoreId = store.Id, CultureName = snapshot.CultureName, Id = slug.ObjectId }, cancellationToken);
                     if (file == null)
                     {
                         return null;

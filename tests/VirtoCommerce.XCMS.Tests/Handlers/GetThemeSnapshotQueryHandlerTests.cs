@@ -170,7 +170,7 @@ public class GetThemeSnapshotQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_LooksThePermalinkUpWithTheSlugInfoQuery_InTheStoreAndLanguageAskedFor()
+    public async Task Handle_LooksThePermalinkUpWithTheSlugInfoQuery_InTheStoreAndLanguageServed()
     {
         // Arrange
         SlugInfoQuery slugQuery = null;
@@ -187,7 +187,7 @@ public class GetThemeSnapshotQueryHandlerTests
         // Assert
         slugQuery.Permalink.Should().Be("printers/laser");
         slugQuery.StoreId.Should().Be(StoreId);
-        slugQuery.CultureName.Should().Be("de");
+        slugQuery.CultureName.Should().Be("de-DE");
         slugQuery.UserId.Should().BeNull();
     }
 
@@ -347,12 +347,10 @@ public class GetThemeSnapshotQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WhenTheSnapshotReadFails_FailsAfterTheLookupIsDone()
+    public async Task Handle_WhenTheSnapshotReadFails_FailsWithoutLookingThePermalinkUp()
     {
         // Arrange
-        var lookup = new TaskCompletionSource<SlugInfoResponse>();
-        var mediator = new Mock<IMediator>(MockBehavior.Strict);
-        mediator.Setup(x => x.Send(It.IsAny<SlugInfoQuery>(), It.IsAny<CancellationToken>())).Returns(lookup.Task);
+        var mediator = new Mock<IMediator>();
         var snapshots = new Mock<IThemeSnapshotService>();
         snapshots.Setup(x => x.IsNewPageBuilderEnabledAsync(StoreId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         snapshots
@@ -362,13 +360,10 @@ public class GetThemeSnapshotQueryHandlerTests
         // Act
         var handle = CreateHandler(Store(), snapshots.Object, Menus(), mediator.Object)
             .Handle(new GetThemeSnapshotQuery { Domain = "shop.example.com", Permalink = "spring" }, CancellationToken.None);
-        await Task.Yield();
-        var isDoneBeforeTheLookup = handle.IsCompleted;
-        lookup.SetResult(new SlugInfoResponse());
 
         // Assert
-        isDoneBeforeTheLookup.Should().BeFalse();
         await handle.Invoking(x => x).Should().ThrowAsync<IOException>();
+        mediator.Verify(x => x.Send(It.IsAny<SlugInfoQuery>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static SlugInfoResponse Entity(string objectType, string objectId) => new()
