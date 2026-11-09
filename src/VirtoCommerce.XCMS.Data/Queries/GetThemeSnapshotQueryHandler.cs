@@ -55,7 +55,8 @@ public class GetThemeSnapshotQueryHandler(
         storeRequest.StoreId = request.StoreId;
         storeRequest.Domain = request.Domain;
         var store = await storeDomainResolverService.GetStoreAsync(storeRequest);
-        if (store == null)
+        // A store without the New Page Builder has no snapshot: answered without looking up the permalink.
+        if (store == null || !await themeSnapshotService.IsNewPageBuilderEnabledAsync(store.Id, cancellationToken))
         {
             return null;
         }

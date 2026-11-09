@@ -39,6 +39,7 @@ public class GetThemeSnapshotQueryHandlerTests
             .Callback<StoreDomainRequest>(x => storeRequest = x)
             .ReturnsAsync(new Store { Id = StoreId });
         var snapshots = new Mock<IThemeSnapshotService>();
+        snapshots.Setup(x => x.IsNewPageBuilderEnabledAsync(StoreId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         snapshots
             .Setup(x => x.GetPublishedAsync(StoreId, "de", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ThemeSnapshot(StoreId, "de-DE", 4, "{\"format\":1}", []));
@@ -118,11 +119,19 @@ public class GetThemeSnapshotQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithTheNewPageBuilderOff_ReturnsNull()
+    public async Task Handle_WithTheNewPageBuilderOff_ReturnsNull_WithoutReadingTheSnapshotOrTheSlug()
     {
+        // Arrange: strict mocks answer the switch only
+        var snapshots = new Mock<IThemeSnapshotService>(MockBehavior.Strict);
+        snapshots.Setup(x => x.IsNewPageBuilderEnabledAsync(StoreId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
         // Act
-        var result = await CreateHandler(Store(), Snapshots(null), new Mock<IMenuLinkListSearchService>(MockBehavior.Strict).Object)
-            .Handle(new GetThemeSnapshotQuery { Domain = "shop.example.com" }, CancellationToken.None);
+        var result = await CreateHandler(
+                Store(),
+                snapshots.Object,
+                new Mock<IMenuLinkListSearchService>(MockBehavior.Strict).Object,
+                new Mock<IMediator>(MockBehavior.Strict).Object)
+            .Handle(new GetThemeSnapshotQuery { Domain = "shop.example.com", Permalink = "spring" }, CancellationToken.None);
 
         // Assert
         result.Should().BeNull();
@@ -345,6 +354,7 @@ public class GetThemeSnapshotQueryHandlerTests
         var mediator = new Mock<IMediator>(MockBehavior.Strict);
         mediator.Setup(x => x.Send(It.IsAny<SlugInfoQuery>(), It.IsAny<CancellationToken>())).Returns(lookup.Task);
         var snapshots = new Mock<IThemeSnapshotService>();
+        snapshots.Setup(x => x.IsNewPageBuilderEnabledAsync(StoreId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         snapshots
             .Setup(x => x.GetPublishedAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new IOException("The storage is down"));
@@ -383,6 +393,7 @@ public class GetThemeSnapshotQueryHandlerTests
     private static IThemeSnapshotService Snapshots(ThemeSnapshot snapshot)
     {
         var snapshots = new Mock<IThemeSnapshotService>();
+        snapshots.Setup(x => x.IsNewPageBuilderEnabledAsync(StoreId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         snapshots
             .Setup(x => x.GetPublishedAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(snapshot);
