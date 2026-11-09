@@ -22,13 +22,13 @@ public class ThemeSnapshotSchemaTests : IDisposable
     private readonly List<ServiceProvider> _serviceProviders = [];
 
     [Fact]
-    public void Build_AddsThemeSnapshot_WithOptionalDomainStoreIdAndCultureName()
+    public void Build_AddsThemeSnapshot_WithOptionalDomainStoreIdCultureNameAndPermalink()
     {
         var field = BuildField();
 
         Assert.Equal(typeof(ThemeSnapshotType), field.Type);
         Assert.Equal(
-            [("domain", typeof(StringGraphType)), ("storeId", typeof(StringGraphType)), ("cultureName", typeof(StringGraphType))],
+            [("domain", typeof(StringGraphType)), ("storeId", typeof(StringGraphType)), ("cultureName", typeof(StringGraphType)), ("permalink", typeof(StringGraphType))],
             field.Arguments.Select(x => (x.Name, x.Type)));
     }
 
@@ -51,6 +51,7 @@ public class ThemeSnapshotSchemaTests : IDisposable
                 ["domain"] = new("shop.example.com", ArgumentSource.Literal),
                 ["storeId"] = new("B2B-store", ArgumentSource.Literal),
                 ["cultureName"] = new("de-DE", ArgumentSource.Literal),
+                ["permalink"] = new("printers/laser", ArgumentSource.Literal),
             },
         });
 
@@ -59,6 +60,7 @@ public class ThemeSnapshotSchemaTests : IDisposable
         Assert.Equal("shop.example.com", query.Domain);
         Assert.Equal("B2B-store", query.StoreId);
         Assert.Equal("de-DE", query.CultureName);
+        Assert.Equal("printers/laser", query.Permalink);
     }
 
     public void Dispose()

@@ -13,4 +13,7 @@ public class GetThemeSnapshotQuery : IQuery<ThemeSnapshotResult>
 
     /// <summary>The language asked for; the store's closest language is served.</summary>
     public string CultureName { get; set; }
+
+    /// <summary>The page the visitor landed on, as the storefront resolves its slug; optional.</summary>
+    public string Permalink { get; set; }
 }

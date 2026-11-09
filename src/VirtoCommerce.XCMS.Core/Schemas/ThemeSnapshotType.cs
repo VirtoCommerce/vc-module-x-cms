@@ -18,5 +18,9 @@ public class ThemeSnapshotType : ExtendableGraphType<ThemeSnapshotResult>
             "menus",
             "The link lists the header and footer name, under the names they hold",
             resolve: context => context.Source.Menus);
+        ExtendableField<ThemeSnapshotSlugType>(
+            "slug",
+            "What is at the permalink asked for, for an anonymous visitor; null without a permalink, with nothing at it or when the lookup failed",
+            resolve: context => context.Source.Slug);
     }
 }

@@ -22,7 +22,8 @@ public class ThemeSnapshotSchema : ISchemaBuilder
             Arguments = new QueryArguments(
                 new QueryArgument<StringGraphType> { Name = "domain" },
                 new QueryArgument<StringGraphType> { Name = "storeId" },
-                new QueryArgument<StringGraphType> { Name = "cultureName" }
+                new QueryArgument<StringGraphType> { Name = "cultureName" },
+                new QueryArgument<StringGraphType> { Name = "permalink" }
             ),
             Type = GraphTypeExtensionHelper.GetActualType<ThemeSnapshotType>(),
             Resolver = new FuncFieldResolver<object>(async context =>
@@ -31,6 +32,7 @@ public class ThemeSnapshotSchema : ISchemaBuilder
                 query.Domain = context.GetArgument<string>("domain");
                 query.StoreId = context.GetArgument<string>("storeId");
                 query.CultureName = context.GetArgument<string>("cultureName");
+                query.Permalink = context.GetArgument<string>("permalink");
 
                 return await context.GetMediator().Send(query);
             }),
