@@ -48,6 +48,8 @@ public class GetPageDocumentAlternatesQueryHandler(
         criteria.Status = PageDocumentStatus.Published;
         criteria.CertainDate = DateTime.UtcNow;
         criteria.OrganizationId = request.OrganizationId;
+        // A visitor without an organization must not find pages made for one.
+        criteria.FilterByOrganization = true;
 
         await criteria.EnrichAuth(FindUser(request.UserId), memberService);
 

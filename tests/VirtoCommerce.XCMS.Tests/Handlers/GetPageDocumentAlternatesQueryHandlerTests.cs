@@ -213,6 +213,30 @@ namespace VirtoCommerce.XCMS.Tests.Handlers
             criteria.UserGroups.Should().BeEmpty();
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("org")]
+        public async Task Handle_FiltersByTheVisitorOrganization(string organizationId)
+        {
+            // Arrange
+            PageDocumentSearchCriteria criteria = null;
+            var search = new Mock<IPageDocumentSearchService>();
+            search
+                .Setup(x => x.SearchAsync(It.IsAny<PageDocumentSearchCriteria>(), It.IsAny<bool>()))
+                .Callback<PageDocumentSearchCriteria, bool>((c, _) => criteria = c)
+                .ReturnsAsync(new PageDocumentSearchResult { Results = [] });
+            var handler = CreateHandler(search.Object);
+
+            // Act
+            await handler.Handle(
+                new GetPageDocumentAlternatesQuery { StoreId = "Store", TranslationGroupId = "faq", OrganizationId = organizationId, UserId = AnonymousUser.UserName },
+                CancellationToken.None);
+
+            // Assert
+            criteria.FilterByOrganization.Should().BeTrue();
+            criteria.OrganizationId.Should().Be(organizationId);
+        }
+
         private static IPageDocumentSearchService SearchReturning(params PageDocument[] documents)
         {
             var search = new Mock<IPageDocumentSearchService>();
