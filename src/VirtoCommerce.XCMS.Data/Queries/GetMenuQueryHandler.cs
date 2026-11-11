@@ -33,7 +33,6 @@ namespace VirtoCommerce.XCMS.Data.Queries
             return result;
         }
 
-        /// <summary>The list with that name in that language, with a link's children from the list named after it; <c>null</c> when there is none.</summary>
         internal static Menu ToMenu(IList<MenuLinkList> menuLinkLists, string cultureName, string name)
         {
             var menuLinkList = GetMenuLinkList(menuLinkLists, cultureName, name);

@@ -9,9 +9,7 @@ using VirtoCommerce.XCMS.Core.Schemas;
 
 namespace VirtoCommerce.XCMS.Data.Schemas;
 
-/// <summary>
-/// A store's published Page Builder theme. Anonymous, because the theme is the same for every visitor.
-/// </summary>
+/// <summary>Anonymous, because the theme is the same for every visitor.</summary>
 public class ThemeSnapshotSchema : ISchemaBuilder
 {
     public void Build(ISchema schema)

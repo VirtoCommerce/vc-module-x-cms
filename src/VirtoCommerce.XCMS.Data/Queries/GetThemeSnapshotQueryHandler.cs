@@ -24,9 +24,8 @@ using static VirtoCommerce.ContentModule.Core.ContentConstants;
 namespace VirtoCommerce.XCMS.Data.Queries;
 
 /// <summary>
-/// A store's published Page Builder theme with the menus it names and what is at the permalink asked for. The menus and
-/// the permalink are read on every request, outside the cached snapshot, so a menu edited in Content shows without a new
-/// publication. The permalink is looked up in the language the snapshot is served in.
+/// Menus are read on every request rather than published with the snapshot, so a menu edited in Content shows without a
+/// new publication.
 /// </summary>
 public class GetThemeSnapshotQueryHandler(
     IStoreDomainResolverService storeDomainResolverService,
@@ -37,16 +36,12 @@ public class GetThemeSnapshotQueryHandler(
     ILogger<GetThemeSnapshotQueryHandler> logger)
     : IQueryHandler<GetThemeSnapshotQuery, ThemeSnapshotResult>
 {
-    /// <summary>The slug object type of a page from the database.</summary>
     public const string PagesObjectType = "Pages";
 
-    /// <summary>The slug object type of a file page.</summary>
     public const string ContentFileObjectType = "ContentFile";
 
-    /// <summary>The storefront's page rule condition that reads a page setting: <c>{ "setting": { "name", "equals" } }</c>.</summary>
     protected const string SettingConditionName = "setting";
 
-    /// <summary>The page settings that choose a content page's template and layout on their own.</summary>
     protected static readonly IReadOnlyList<string> TemplateSettingNames = ["layout", "template"];
 
     public virtual async Task<ThemeSnapshotResult> Handle(GetThemeSnapshotQuery request, CancellationToken cancellationToken)
@@ -55,7 +50,6 @@ public class GetThemeSnapshotQueryHandler(
         storeRequest.StoreId = request.StoreId;
         storeRequest.Domain = request.Domain;
         var store = await storeDomainResolverService.GetStoreAsync(storeRequest);
-        // A store without the New Page Builder has no snapshot: answered without looking up the permalink.
         if (store == null || !await themeSnapshotService.IsNewPageBuilderEnabledAsync(store.Id, cancellationToken))
         {
             return null;
@@ -94,7 +88,7 @@ public class GetThemeSnapshotQueryHandler(
             .Where(x => x.Menu != null)
             .Select(x =>
             {
-                // under the name the theme holds, which the storefront looks it up by
+                // the storefront looks a menu up by the name the theme holds, which may differ in case from the list's
                 x.Menu.Name = x.Name;
                 return x.Menu;
             })
@@ -102,9 +96,8 @@ public class GetThemeSnapshotQueryHandler(
     }
 
     /// <summary>
-    /// Looks the permalink up with the storefront's <c>slugInfo</c> query, for an anonymous visitor in the language served
-    /// (a URL may name only its language part), and reads a content page found there. Null without a permalink, with
-    /// nothing at the permalink (or a redirect) and when the lookup fails.
+    /// Anonymous, as the snapshot is the same for every visitor, and in the language served rather than the one asked for:
+    /// a URL may name only its language part.
     /// </summary>
     protected virtual async Task<ThemeSnapshotSlug> GetSlugAsync(Store store, GetThemeSnapshotQuery request, ThemeSnapshot snapshot, CancellationToken cancellationToken)
     {
@@ -141,10 +134,6 @@ public class GetThemeSnapshotQueryHandler(
         }
     }
 
-    /// <summary>
-    /// Reads a content page at the permalink with the storefront's <c>pageDocument</c> and <c>page</c> queries, keeping
-    /// only the settings that choose its template and layout. Null for other object types and a page not found.
-    /// </summary>
     protected virtual async Task<ThemeSnapshotSlugPage> GetSlugPageAsync(Store store, ThemeSnapshotSlug slug, ThemeSnapshot snapshot, CancellationToken cancellationToken)
     {
         if (slug.ObjectType is not (PagesObjectType or ContentFileObjectType))
@@ -198,10 +187,7 @@ public class GetThemeSnapshotQueryHandler(
         return page;
     }
 
-    /// <summary>
-    /// The page settings the storefront chooses a content page's template and layout by: <c>layout</c>, <c>template</c>
-    /// and the names the snapshot's page rules give their <c>setting</c> condition. The rules are read, never applied.
-    /// </summary>
+    /// <summary>The page rules are read only for the settings they name, never applied: the storefront applies them.</summary>
     protected virtual ISet<string> GetTemplateSettingNames(ThemeSnapshot snapshot)
     {
         var names = new HashSet<string>(TemplateSettingNames, StringComparer.Ordinal);
@@ -227,16 +213,12 @@ public class GetThemeSnapshotQueryHandler(
         return names;
     }
 
-    /// <summary>The <c>settings</c> object of a page's JSON content; null when the content is not such JSON.</summary>
     protected static JObject ReadSettings(TextReader content)
     {
         return ReadProperty(content, "settings") as JObject;
     }
 
-    /// <summary>
-    /// A property of the JSON object the reader holds, read without loading the rest of it. Null without the property and
-    /// for content that is not a JSON object.
-    /// </summary>
+    /// <summary>Reads one property without loading the rest of the JSON.</summary>
     protected static JToken ReadProperty(TextReader content, string name)
     {
         using var reader = new JsonTextReader(content) { CloseInput = false };
